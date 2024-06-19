@@ -1,4 +1,4 @@
-package com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.remote;
+package com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.remote.external;
 
 import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.model.FinancialInstrumentModel;
 import org.springframework.stereotype.Component;
