@@ -36,7 +36,7 @@ public class FinancialInstrumentService {
         return repository.findAll();
     }
 
-    public List<String> getAllSymbolsOfCurrentlySubscribed() {
+    public List<String> getAllSymbolsOfAllCurrentlySubscribedFinancialInstruments() {
         return repository.findAllSymbols();
     }
 
