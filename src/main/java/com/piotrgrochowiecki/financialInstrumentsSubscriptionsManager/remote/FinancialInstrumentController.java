@@ -1,6 +1,9 @@
 package com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.remote;
 
 import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.model.FinancialInstrumentModel;
+import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.service.FinancialInstrumentService;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
