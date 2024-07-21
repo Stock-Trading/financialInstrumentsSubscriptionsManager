@@ -8,7 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.Instant;
 
 @Entity
-@Table(name = "financial_instruments")
+@Table(name = "financial_instrument")
 @Data
 @Builder
 @EqualsAndHashCode(of = "id")
@@ -27,5 +27,7 @@ public class FinancialInstrumentEntity {
     @CreationTimestamp
     @Column(name = "created_on", nullable = false, updatable = false)
     Instant createdOn;
-
+    @ManyToOne
+            @JoinColumn(name = "data_loader_id", nullable = false)
+    DataLoaderEntity dataLoader;
 }
