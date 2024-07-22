@@ -1,4 +1,4 @@
-package com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.remote.external;
+package com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.remote.internal;
 
 import lombok.Builder;
 
