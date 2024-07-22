@@ -1,4 +1,4 @@
-package com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.data;
+package com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.data.dataLoader;
 
 import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.model.DataLoaderModel;
 import org.springframework.stereotype.Component;

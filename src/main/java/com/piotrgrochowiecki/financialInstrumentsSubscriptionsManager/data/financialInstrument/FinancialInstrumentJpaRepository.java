@@ -1,11 +1,9 @@
-package com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.data;
+package com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.data.financialInstrument;
 
-import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.model.FinancialInstrumentModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
-import java.util.Optional;
 
 interface FinancialInstrumentJpaRepository extends JpaRepository<FinancialInstrumentEntity, Long> {
 

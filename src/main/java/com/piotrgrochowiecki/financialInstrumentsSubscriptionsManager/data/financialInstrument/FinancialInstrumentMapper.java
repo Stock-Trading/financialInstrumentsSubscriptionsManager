@@ -1,4 +1,4 @@
-package com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.data;
+package com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.data.financialInstrument;
 
 import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.model.FinancialInstrumentModel;
 import org.springframework.stereotype.Component;
