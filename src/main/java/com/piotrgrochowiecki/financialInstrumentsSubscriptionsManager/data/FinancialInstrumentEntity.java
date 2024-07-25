@@ -1,6 +1,5 @@
-package com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.data.financialInstrument;
+package com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.data;
 
-import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.data.dataLoader.DataLoaderEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
