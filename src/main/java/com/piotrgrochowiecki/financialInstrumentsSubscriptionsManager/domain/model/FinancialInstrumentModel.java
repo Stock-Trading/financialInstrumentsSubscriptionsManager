@@ -5,5 +5,6 @@ import lombok.Builder;
 @Builder
 public record FinancialInstrumentModel(Long id,
                                        String name,
-                                       String symbol) {
+                                       String symbol,
+                                       DataLoaderModel dataLoader) {
 }
