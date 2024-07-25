@@ -1,4 +1,4 @@
-package com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.data.financialInstrument;
+package com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.data;
 
 import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.model.FinancialInstrumentModel;
 import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.ports.FinancialInstrumentRepository;
@@ -14,13 +14,13 @@ import java.util.Optional;
 public class FinancialInstrumentRepositoryImpl implements FinancialInstrumentRepository {
 
     private final FinancialInstrumentJpaRepository jpaRepository;
-    private final FinancialInstrumentMapper mapper;
+    private final DataMapper mapper;
 
     @Override
     public Optional<FinancialInstrumentModel> findById(Long id) {
         try {
             FinancialInstrumentEntity entity = jpaRepository.getReferenceById(id);
-            return Optional.of(mapper.mapToModel(entity));
+            return Optional.of(mapper.mapToFinancialInstrumentModel(entity));
         } catch (EntityNotFoundException entityNotFoundException) {
             return Optional.empty();
         }
@@ -30,7 +30,7 @@ public class FinancialInstrumentRepositoryImpl implements FinancialInstrumentRep
     public Optional<FinancialInstrumentModel> findByName(String name) {
         try {
             FinancialInstrumentEntity entity = jpaRepository.getByName(name);
-            return Optional.of(mapper.mapToModel(entity));
+            return Optional.of(mapper.mapToFinancialInstrumentModel(entity));
         } catch (EntityNotFoundException entityNotFoundException) {
             return Optional.empty();
         }
@@ -40,7 +40,7 @@ public class FinancialInstrumentRepositoryImpl implements FinancialInstrumentRep
     public Optional<FinancialInstrumentModel> findBySymbol(String symbol) {
         try {
             FinancialInstrumentEntity entity = jpaRepository.getBySymbol(symbol);
-            return Optional.of(mapper.mapToModel(entity));
+            return Optional.of(mapper.mapToFinancialInstrumentModel(entity));
         } catch (EntityNotFoundException entityNotFoundException) {
             return Optional.empty();
         }
@@ -50,7 +50,7 @@ public class FinancialInstrumentRepositoryImpl implements FinancialInstrumentRep
     public List<FinancialInstrumentModel> findAll() {
         return jpaRepository.findAll()
                 .stream()
-                .map(mapper::mapToModel)
+                .map(mapper::mapToFinancialInstrumentModel)
                 .toList();
     }
 
@@ -61,9 +61,9 @@ public class FinancialInstrumentRepositoryImpl implements FinancialInstrumentRep
 
     @Override
     public FinancialInstrumentModel save(FinancialInstrumentModel model) {
-        FinancialInstrumentEntity entity = mapper.mapToEntity(model);
+        FinancialInstrumentEntity entity = mapper.mapToFinancialInstrumentEntity(model);
         FinancialInstrumentEntity savedEntity = jpaRepository.save(entity);
-        return mapper.mapToModel(savedEntity);
+        return mapper.mapToFinancialInstrumentModel(savedEntity);
     }
 
     @Override
