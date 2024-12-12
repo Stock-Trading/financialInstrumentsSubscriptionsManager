@@ -6,6 +6,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +18,20 @@ public class FinancialInstrumentRepositoryImpl implements FinancialInstrumentRep
     private final DataMapper mapper;
 
     @Override
+    public Collection<FinancialInstrumentModel> findAllAssignedToDataLoaderByUuid(String dataLoaderUuid) {
+        return jpaRepository.findByDataLoaderUuid(dataLoaderUuid).stream()
+                .map(mapper::mapToFinancialInstrumentModel)
+                .toList();
+    }
+
+    @Override
+    public Collection<FinancialInstrumentModel> findAllUnassignedToAnyDataLoader() {
+        return jpaRepository.findUnassignedToAnyDataLoader().stream()
+                .map(mapper::mapToFinancialInstrumentModel)
+                .toList();
+    }
+
+    @Override
     public Optional<FinancialInstrumentModel> findById(Long id) {
         try {
             FinancialInstrumentEntity entity = jpaRepository.getReferenceById(id);
@@ -25,6 +40,8 @@ public class FinancialInstrumentRepositoryImpl implements FinancialInstrumentRep
             return Optional.empty();
         }
     }
+
+    //TODO zamienić zwracanie pustego optionala na rzucanie wyjątku
 
     @Override
     public Optional<FinancialInstrumentModel> findByName(String name) {
@@ -94,5 +111,20 @@ public class FinancialInstrumentRepositoryImpl implements FinancialInstrumentRep
     @Override
     public boolean existsBySymbol(String symbol) {
         return jpaRepository.existsBySymbol(symbol);
+    }
+
+    @Override
+    public boolean existsWithNoDataLoaderAssigned() {
+        return jpaRepository.existsWithNoDataLoaderAssigned();
+    }
+
+    @Override
+    public void unassignFromDataLoader(Long dataLoaderId) {
+        jpaRepository.unassignFromDataLoader(dataLoaderId);
+    }
+
+    @Override
+    public void assignToDataLoader(Long dataLoaderId, String dataLoaderUuid, Long financialInstrumentId) {
+        jpaRepository.assignToDataLoader(dataLoaderId, dataLoaderUuid, financialInstrumentId);
     }
 }

@@ -1,6 +1,5 @@
 package com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.data;
 
-import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.data.FinancialInstrumentEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -21,13 +20,15 @@ public class DataLoaderEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    @Column
+    @Column(unique = true)
     String uuid;
     @Column(name = "last_connected_on", nullable = false)
-    Instant lastConnected;
+    Instant lastConnectedOn;
+    @Column(name = "last_handled_on")
+    Instant lastHandledOn;
     @OneToMany(cascade = CascadeType.ALL,
-    fetch = FetchType.LAZY,
-    mappedBy = "dataLoader")
+            fetch = FetchType.LAZY,
+            mappedBy = "dataLoader")
     Collection<FinancialInstrumentEntity> financialInstrument;
 
 }

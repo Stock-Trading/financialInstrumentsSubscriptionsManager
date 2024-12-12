@@ -16,7 +16,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class FinancialInstrumentEntity {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
@@ -28,6 +28,9 @@ public class FinancialInstrumentEntity {
     @Column(name = "created_on", nullable = false, updatable = false)
     Instant createdOn;
     @ManyToOne
-            @JoinColumn(name = "data_loader_id", nullable = false)
+    @JoinColumns({
+            @JoinColumn(name = "data_loader_id", referencedColumnName = "id"),
+            @JoinColumn(name = "data_loader_uuid", referencedColumnName = "uuid")}
+    )
     DataLoaderEntity dataLoader;
 }

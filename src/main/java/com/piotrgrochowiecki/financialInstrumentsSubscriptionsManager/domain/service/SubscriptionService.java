@@ -1,21 +1,31 @@
 package com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.service;
 
+import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.model.DataLoaderModel;
+import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.model.FinancialInstrumentModel;
 import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.model.SubscriptionModel;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
+
+
+@Service
+@RequiredArgsConstructor
 public class SubscriptionService {
 
-    public SubscriptionModel subscribe(String dataLoaderUUID) {
-        //check if data loader with given uuid is already present in the system
-        //if yes, check status healthy/unhealthy based on last connection time (> 5min == status unhealthy)
-            //if healthy, 1. add financial instruments from database to the collection
-            //2. return subscriptionModel
-            //if unhealthy, ???
-        //if no,
-            //1. save data loader to DB
-            //2. fetch financial instruments not registered with any other data loader, assign data_loader_id of just
-            // saved DL to these instruments
-            //3. return subscriptionModel
+    private final DataLoaderService dataLoaderService;
 
-        return null;
+    public SubscriptionModel subscribe(String dataLoaderUUID) {
+        DataLoaderModel dataLoaderModelOptional = dataLoaderService.getByUuid(dataLoaderUUID);
+        List<FinancialInstrumentModel> financialInstrumentModelList = dataLoaderModelOptional.getFinancialInstrumentModelCollection().stream().toList();
+        return SubscriptionModel.builder()
+                .dataLoaderUUID(dataLoaderModelOptional.getUuid())
+                .financialInstrumentModelCollection(financialInstrumentModelList)
+                .build();
     }
+
 }
+

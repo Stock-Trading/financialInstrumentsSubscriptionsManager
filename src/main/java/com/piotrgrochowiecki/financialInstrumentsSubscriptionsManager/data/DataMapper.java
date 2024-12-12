@@ -5,36 +5,55 @@ import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.mod
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
 class DataMapper {
 
+    private final FinancialInstrumentJpaRepository financialInstrumentJpaRepository;
+
     FinancialInstrumentModel mapToFinancialInstrumentModel(FinancialInstrumentEntity entity) {
+        DataLoaderEntity dataLoaderEntity = entity.getDataLoader();
+        if (Objects.isNull(dataLoaderEntity)) {
+            return FinancialInstrumentModel.builder()
+                    .id(entity.getId())
+                    .name(entity.getName())
+                    .symbol(entity.getSymbol())
+                    .build();
+        }
         return FinancialInstrumentModel.builder()
                 .id(entity.getId())
                 .name(entity.getName())
                 .symbol(entity.getSymbol())
-                .dataLoader(mapToDataLoaderModel(entity.getDataLoader()))
+                .dataLoader(mapToDataLoaderModel(dataLoaderEntity))
                 .build();
     }
 
     FinancialInstrumentEntity mapToFinancialInstrumentEntity(FinancialInstrumentModel model) {
+        if (Objects.isNull(model.getDataLoader())) {
+            return FinancialInstrumentEntity.builder()
+                    .id(model.getId())
+                    .name(model.getName())
+                    .symbol(model.getSymbol())
+                    .build();
+        }
         return FinancialInstrumentEntity.builder()
-                .name(model.name())
-                .symbol(model.symbol())
-                .dataLoader(mapToDataLoaderEntity(model.dataLoader()))
+                .name(model.getName())
+                .symbol(model.getSymbol())
+                .dataLoader(mapToDataLoaderEntity(model.getDataLoader()))
                 .build();
     }
 
     DataLoaderModel mapToDataLoaderModel(DataLoaderEntity entity) {
+        Collection<FinancialInstrumentEntity> financialInstrumentEntityCollection = financialInstrumentJpaRepository.findByDataLoaderId(entity.getId());
         return DataLoaderModel.builder()
                 .id(entity.getId())
                 .uuid(entity.getUuid())
-                .lastConnected(entity.getLastConnected())
-                .financialInstrumentModelCollection(entity.getFinancialInstrument()
-                        .stream()
+                .lastConnectedOn(entity.getLastConnectedOn())
+                .financialInstrumentModelCollection(financialInstrumentEntityCollection.stream()
                         .map(this::mapToFinancialInstrumentModel)
                         .collect(Collectors.toList())
                 )
@@ -43,9 +62,10 @@ class DataMapper {
 
     DataLoaderEntity mapToDataLoaderEntity(DataLoaderModel model) {
         return DataLoaderEntity.builder()
-                .uuid(model.uuid())
-                .lastConnected(model.lastConnected())
-                .financialInstrument(model.financialInstrumentModelCollection()
+                .id(model.getId())
+                .uuid(model.getUuid())
+                .lastConnectedOn(model.getLastConnectedOn())
+                .financialInstrument(model.getFinancialInstrumentModelCollection()
                         .stream()
                         .map(this::mapToFinancialInstrumentEntity)
                         .collect(Collectors.toList()))
