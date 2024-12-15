@@ -32,14 +32,6 @@ interface FinancialInstrumentJpaRepository extends JpaRepository<FinancialInstru
 
     void deleteById(Long id);
 
-    void deleteByName(String name);
-
-    void deleteBySymbol(String symbol);
-
-    boolean existsByName(String name);
-
-    boolean existsBySymbol(String symbol);
-
     @Query(value = "SELECT EXISTS(SELECT 1) " +
             "FROM financial_instrument f " +
             "WHERE f.data_loader_uuid IS NULL",

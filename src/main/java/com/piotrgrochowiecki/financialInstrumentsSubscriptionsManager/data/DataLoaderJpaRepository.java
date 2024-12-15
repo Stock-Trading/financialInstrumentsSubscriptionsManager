@@ -14,12 +14,16 @@ interface DataLoaderJpaRepository extends JpaRepository<DataLoaderEntity, Long> 
 
     Optional<DataLoaderEntity> findByUuid(String uuid);
 
-    @Query("SELECT COUNT(d) FROM DataLoaderEntity d")
+    @Query(value = "SELECT COUNT(d) " +
+            "FROM DataLoaderEntity d",
+            nativeQuery = true)
     long countDataLoaders();
 
     @Transactional
     @Modifying(flushAutomatically = true)
-    @Query(value = "UPDATE data_loader dl SET dl.last_connected_on = :instant WHERE dl.uuid = :uuid",
+    @Query(value = "UPDATE data_loader dl " +
+            "SET dl.last_connected_on = :instant " +
+            "WHERE dl.uuid = :uuid",
             nativeQuery = true)
     void updateDataLoaderLastConnectedOnTime(@Param("uuid") String dataLoaderUuid, @Param("instant") Instant instant);
 
@@ -31,28 +35,28 @@ interface DataLoaderJpaRepository extends JpaRepository<DataLoaderEntity, Long> 
 
     List<DataLoaderEntity> findByLastConnectedOnGreaterThanAndLastHandledOnLessThanEqual(Instant lastConnectedOn, Instant firstHandledOn);
 
-    @Query(value =  "SELECT * " +
-                    "FROM data_loader dl " +
-                    "COUNT(fi.id) AS instrumentCount " +
-                    "JOIN financial_instrument fi ON data_loader dl = dl.id " +
-                    "GROUP BY dl.id, dl.uuid " +
-                    "HAVING COUNT(fi.id) > :instrumentThreshold " +
-                    "ORDER BY instrumentCount ASC",
+    @Query(value = "SELECT * " +
+            "FROM data_loader dl " +
+            "COUNT(fi.id) AS instrumentCount " +
+            "JOIN financial_instrument fi ON data_loader dl = dl.id " +
+            "GROUP BY dl.id, dl.uuid " +
+            "HAVING COUNT(fi.id) > :instrumentThreshold " +
+            "ORDER BY instrumentCount ASC",
             nativeQuery = true
     )
     List<DataLoaderEntity> findAllWithNumberOfAssignedFinancialInstrumentsGreaterThanRecommendedOrderAsc(@Param("instrumentThreshold") Integer numberOfRecommendedFinancialInstrumentsPerDataLoader);
 
-    @Query(value =  "SELECT * " +
-                    "FROM data_loader dl " +
-                    "COUNT(fi.id) AS instrumentCount " +
-                    "JOIN financial_instrument fi ON data_loader dl = dl.id " +
-                    "WHERE dl.last_connected_on > :lastConnectedThreshold " +
-                    "GROUP BY dl.id, dl.uuid, dl.last_connected_on " +
-                    "HAVING COUNT(fi.id) <= :instrumentThreshold " +
-                    "ORDER BY instrumentCount ASC",
+    @Query(value = "SELECT * " +
+            "FROM data_loader dl " +
+            "COUNT(fi.id) AS instrumentCount " +
+            "JOIN financial_instrument fi ON data_loader dl = dl.id " +
+            "WHERE dl.last_connected_on > :lastConnectedThreshold " +
+            "GROUP BY dl.id, dl.uuid, dl.last_connected_on " +
+            "HAVING COUNT(fi.id) <= :instrumentThreshold " +
+            "ORDER BY instrumentCount ASC",
             nativeQuery = true
     )
     List<DataLoaderEntity> findAllWithNumberOfAssignedFinancialInstrumentsLessThanEqualRecommendedAndLastConnectedOnGreaterThanOrderAscByFinancialInstrumentCount(@Param("instrumentThreshold") Integer numberOfRecommendedFinancialInstrumentsPerDataLoader,
-                                                                                                              @Param("lastConnectedThreshold") Instant lastConnectedOn);
+                                                                                                                                                                  @Param("lastConnectedThreshold") Instant lastConnectedOn);
 
 }

@@ -4,7 +4,6 @@ import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.mod
 import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.ports.DataLoaderRepository;
 import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.service.TimeService;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,12 +45,6 @@ public class DataLoaderRepositoryImpl implements DataLoaderRepository {
             return mapper.mapToDataLoaderModel(dataLoaderEntityOptional.get());
         }
         throw new EntityNotFoundException("No DataLoaderEntity found with uuid " + dataLoaderUUID);
-    }
-
-
-    @Override
-    public long countDataLoaders() {
-        return jpaRepository.countDataLoaders();
     }
 
     @Override

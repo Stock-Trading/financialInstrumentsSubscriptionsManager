@@ -17,8 +17,6 @@ public interface DataLoaderRepository {
 
     DataLoaderModel findByUuid(String dataLoaderUUID);
 
-    long countDataLoaders();
-
     Collection<DataLoaderModel> findAllActiveDataLoaders(Duration timeFromLastConnectionAsHealthThreshold);
 
     Collection<DataLoaderModel> findAllInactiveDataLoaders(Duration timeFromLastConnectionAsHealthThreshold);
@@ -26,10 +24,11 @@ public interface DataLoaderRepository {
     Collection<DataLoaderModel> findAllActiveAndUnhandledDataLoaders(Duration timeFromLastConnectionAsHealthThreshold,
                                                                      Duration timeFromLastHandledTimeAsUnhandledThreshold);
 
-    List<DataLoaderModel> findAllWithNumberOfAssignedFinancialInstrumentsGreaterThanRecommendedAndLastConnectedOnGreaterThanOrderAscByFinancialInstrumentCount(Integer recommendedNumberOfFinancialInstrumentsPerDataLoader, Duration timeFromLastConnectionAsHealthThreshold);
+    List<DataLoaderModel> findAllWithNumberOfAssignedFinancialInstrumentsGreaterThanRecommendedAndLastConnectedOnGreaterThanOrderAscByFinancialInstrumentCount(Integer recommendedNumberOfFinancialInstrumentsPerDataLoader,
+                                                                                                                                                               Duration timeFromLastConnectionAsHealthThreshold);
 
-    List<DataLoaderModel> findAllWithNumberOfAssignedFinancialInstrumentsLessThanEqualRecommendedAndLastConnectedOnGreaterThanOrderAscByFinancialInstrumentCount(Integer recommendedNumberOfFinancialInstrumentsPerDataLoader, Duration timeFromLastConnectionAsHealthThreshold);
-
+    List<DataLoaderModel> findAllWithNumberOfAssignedFinancialInstrumentsLessThanEqualRecommendedAndLastConnectedOnGreaterThanOrderAscByFinancialInstrumentCount(Integer recommendedNumberOfFinancialInstrumentsPerDataLoader,
+                                                                                                                                                                 Duration timeFromLastConnectionAsHealthThreshold);
 
     boolean existsByUuid(String dataLoaderUUID);
 }
