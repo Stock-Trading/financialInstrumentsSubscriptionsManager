@@ -31,7 +31,8 @@ interface DataLoaderJpaRepository extends JpaRepository<DataLoaderEntity, Long> 
 
     List<DataLoaderEntity> findByLastConnectedOnGreaterThanEqual(Instant instant);
 
-    List<DataLoaderEntity> findByLastConnectedOnLessThanEqual(Instant instant);
+    @Lock(value = LockModeType.PESSIMISTIC_READ)
+    List<DataLoaderEntity> findByLastConnectedOnLessThanEqualLimit5(Instant instant);
 
     List<DataLoaderEntity> findByLastConnectedOnGreaterThanAndLastHandledOnLessThanEqual(Instant lastConnectedOn, Instant firstHandledOn);
 

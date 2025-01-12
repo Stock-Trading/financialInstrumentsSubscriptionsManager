@@ -7,7 +7,6 @@ import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.mod
 import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.ports.DataLoaderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,17 +50,28 @@ public class DataLoaderService {
         }
     }
 
+    @Transactional
+    public void update(DataLoaderModel dataLoaderModel) {
+        if (Objects.isNull(dataLoaderModel.getId())) {
+            throw new RuntimeException("Cannot update Data Loader as its id is null");
+        }
+        dataLoaderRepository.save(dataLoaderModel);
+    }
+
     /**
      * Regular method that checks for last check-in time of DataLoader. If that time is longer then specified threshold,
      * unassigns FinancialInstrument from it.
      */
     @Transactional
     @Scheduled(fixedDelay = 3000)
-    private void checkHealth() {
-        log.info("Running regular data loaders health check");
-        Collection<DataLoaderModel> inactiveDataLoaders = getAllInactiveDataLoaders();
-        log.info("Collection of inactive data loaders has {} elements in it", inactiveDataLoaders.size());
-        inactiveDataLoaders.forEach(dataLoader -> dataLoader.setFinancialInstrumentModelCollection(null));
+    void checkHealth() {
+        log.debug("Running regular data loaders health check");
+        Collection<DataLoaderModel> inactiveDataLoaders = get5InactiveDataLoaders();
+        log.debug("Collection of inactive data loaders has {} elements in it", inactiveDataLoaders.size());
+        inactiveDataLoaders.forEach(dataLoader -> {
+            dataLoader.setFinancialInstrumentModelCollection(null);
+            update(dataLoader);
+        });
     }
 
     @Transactional
@@ -104,8 +114,8 @@ public class DataLoaderService {
         }
     }
 
-    public Collection<DataLoaderModel> getAllInactiveDataLoaders() {
-        return dataLoaderRepository.findAllInactiveDataLoaders(Duration.ofSeconds(TIME_THRESHOLD_OF_HEALTH_MILS));
+    public Collection<DataLoaderModel> get5InactiveDataLoaders() {
+        return dataLoaderRepository.find5InactiveDataLoaders(Duration.ofSeconds(TIME_THRESHOLD_OF_HEALTH_MILS));
     }
 
     public Collection<DataLoaderModel> getAllActiveDataLoaders() {

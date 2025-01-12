@@ -56,9 +56,9 @@ public class DataLoaderRepositoryImpl implements DataLoaderRepository {
     }
 
     @Override
-    public Collection<DataLoaderModel> findAllInactiveDataLoaders(Duration timeFromLastConnectionAsHealthThreshold) {
+    public Collection<DataLoaderModel> find5InactiveDataLoaders(Duration timeFromLastConnectionAsHealthThreshold) {
         Instant lastInstantCountingAsHealthy = timeService.getInstantUTC().minus(timeFromLastConnectionAsHealthThreshold);
-        return jpaRepository.findByLastConnectedOnLessThanEqual(lastInstantCountingAsHealthy).stream()
+        return jpaRepository.findByLastConnectedOnLessThanEqualLimit5(lastInstantCountingAsHealthy).stream()
                 .map(mapper::mapToDataLoaderModel)
                 .toList();
     }

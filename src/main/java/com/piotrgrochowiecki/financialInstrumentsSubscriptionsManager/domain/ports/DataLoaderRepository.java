@@ -19,7 +19,7 @@ public interface DataLoaderRepository {
 
     Collection<DataLoaderModel> findAllActiveDataLoaders(Duration timeFromLastConnectionAsHealthThreshold);
 
-    Collection<DataLoaderModel> findAllInactiveDataLoaders(Duration timeFromLastConnectionAsHealthThreshold);
+    Collection<DataLoaderModel> find5InactiveDataLoaders(Duration timeFromLastConnectionAsHealthThreshold);
 
     Collection<DataLoaderModel> findAllActiveAndUnhandledDataLoaders(Duration timeFromLastConnectionAsHealthThreshold,
                                                                      Duration timeFromLastHandledTimeAsUnhandledThreshold);
