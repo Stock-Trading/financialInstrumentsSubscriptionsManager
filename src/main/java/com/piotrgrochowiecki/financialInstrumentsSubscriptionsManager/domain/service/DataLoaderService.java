@@ -76,7 +76,7 @@ public class DataLoaderService {
 
     @Transactional
     @Scheduled(fixedDelay = 17_500)
-    private void rebalanceDataLoaders() {
+    void rebalanceDataLoaders() {
         log.info("Running regular rebalance of Data Loaders");
         List<DataLoaderModel> allDataLoaders = getAllActiveAndUnhandledDataLoaders().stream().toList();
 
