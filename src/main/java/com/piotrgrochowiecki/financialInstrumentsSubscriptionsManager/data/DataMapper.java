@@ -53,7 +53,8 @@ class DataMapper {
                 .id(entity.getId())
                 .uuid(entity.getUuid())
                 .lastConnectedOn(entity.getLastConnectedOn())
-                .financialInstrumentModelCollection(financialInstrumentEntityCollection.stream()
+                .active(entity.getActive())
+                .financialInstrumentModelCollection(entity.getFinancialInstrument().stream()
                         .map(this::mapToFinancialInstrumentModel)
                         .collect(Collectors.toList())
                 )
@@ -65,10 +66,7 @@ class DataMapper {
                 .id(model.getId())
                 .uuid(model.getUuid())
                 .lastConnectedOn(model.getLastConnectedOn())
-                .financialInstrument(model.getFinancialInstrumentModelCollection()
-                        .stream()
-                        .map(this::mapToFinancialInstrumentEntity)
-                        .collect(Collectors.toList()))
+                .active(model.getActive())
                 .build();
     }
 

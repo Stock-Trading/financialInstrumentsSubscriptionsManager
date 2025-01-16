@@ -18,13 +18,15 @@ public class DataLoaderModel {
     private String uuid;
     private Instant lastConnectedOn;
     private Instant lastHandledOn;
+    private Boolean active;
     private Collection<FinancialInstrumentModel> financialInstrumentModelCollection;
 
-    public DataLoaderModel(Long id, String uuid, Instant lastConnectedOn, Instant lastHandledOn, Collection<FinancialInstrumentModel> financialInstrumentModelCollection) {
+    public DataLoaderModel(Long id, String uuid, Instant lastConnectedOn, Instant lastHandledOn, Boolean active, Collection<FinancialInstrumentModel> financialInstrumentModelCollection) {
         this.id = id;
         this.uuid = uuid;
         this.lastConnectedOn = lastConnectedOn;
         this.lastHandledOn = lastHandledOn;
+        this.active = active;
         this.financialInstrumentModelCollection = financialInstrumentModelCollection;
     }
 }

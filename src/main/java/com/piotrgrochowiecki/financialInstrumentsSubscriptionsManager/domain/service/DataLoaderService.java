@@ -35,7 +35,7 @@ public class DataLoaderService {
             log.error("Data loader with uuid {} has already been registered", dataLoaderUuid);
             throw new ModelAlreadyExistsException("Data loader with uuid " + dataLoaderUuid + " has already been registered");
         }
-        DataLoaderModel dataLoaderModel = new DataLoaderModel(null, dataLoaderUuid, timeService.getInstantUTC(), null, null);
+        DataLoaderModel dataLoaderModel = new DataLoaderModel(null, dataLoaderUuid, timeService.getInstantUTC(), null, true, null);
         return dataLoaderRepository.save(dataLoaderModel);
     }
 

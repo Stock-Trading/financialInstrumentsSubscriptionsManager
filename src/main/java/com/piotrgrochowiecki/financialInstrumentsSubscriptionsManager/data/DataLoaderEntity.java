@@ -26,6 +26,8 @@ public class DataLoaderEntity {
     Instant lastConnectedOn;
     @Column(name = "last_handled_on")
     Instant lastHandledOn;
+    @Column(name = "active", nullable = false)
+    Boolean active;
     @OneToMany(cascade = CascadeType.ALL,
             fetch = FetchType.LAZY,
             mappedBy = "dataLoader")

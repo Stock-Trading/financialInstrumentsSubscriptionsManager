@@ -17,7 +17,7 @@ public interface DataLoaderRepository {
 
     DataLoaderModel findByUuid(String dataLoaderUUID);
 
-    Collection<DataLoaderModel> findAllActiveDataLoaders(Duration timeFromLastConnectionAsHealthThreshold);
+    Collection<DataLoaderModel> find5ActiveDataLoaders();
 
     Collection<DataLoaderModel> find5InactiveDataLoaders(Duration timeFromLastConnectionAsHealthThreshold);
 
