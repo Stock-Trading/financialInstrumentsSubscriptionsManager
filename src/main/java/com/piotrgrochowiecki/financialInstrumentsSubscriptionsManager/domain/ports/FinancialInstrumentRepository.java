@@ -8,10 +8,10 @@ import java.util.Collection;
 @Repository
 public interface FinancialInstrumentRepository {
 
-    Collection<FinancialInstrumentModel> findAllUnassignedToAnyDataLoader();
+    FinancialInstrumentModel save(FinancialInstrumentModel financialInstrumentModel);
+
+    Collection<FinancialInstrumentModel> find5UnassignedToAnyDataLoader();
 
     boolean existsWithNoDataLoaderAssigned();
-
-    void unassignFromDataLoader(Long dataLoaderId);
 
 }

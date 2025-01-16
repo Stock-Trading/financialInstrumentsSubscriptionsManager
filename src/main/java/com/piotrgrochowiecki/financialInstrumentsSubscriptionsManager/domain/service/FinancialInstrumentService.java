@@ -11,7 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @AllArgsConstructor
@@ -21,46 +23,59 @@ public class FinancialInstrumentService {
     private final FinancialInstrumentRepository financialInstrumentRepository;
     private final DataLoaderService dataLoaderService;
 
-    @Scheduled(fixedDelay = 3000)
-    private void assignUnassignedInstrumentsToActiveDataLoaders() {
+    @Transactional
+    public void update(FinancialInstrumentModel financialInstrumentModel) {
+        if (Objects.isNull(financialInstrumentModel.getId())) {
+            throw new RuntimeException("Cannot update Financial Instrument as its id is null");
+        }
+        financialInstrumentRepository.save(financialInstrumentModel);
+    }
+
+    @Scheduled(fixedDelay = 10_000)
+    @Transactional
+    void assignUnassignedInstrumentsToActiveDataLoaders() {
+        log.debug("Starting regular task of assigning unassigned Financial Instruments to active Data Loaders");
         if (!areThereAnyFinancialInstrumentsUnassignedToAnyDataLoader()) {
-            log.info("All financial instruments are assigned to data loaders.");
+            log.debug("All financial instruments are assigned to data loaders.");
             return;
         }
-
-        List<FinancialInstrumentModel> unassignedFIs = getFinancialInstrumentsUnassignedToAnyDataLoader().stream().toList();
-        List<DataLoaderModel> activeDataLoadersWithNumberOfFIsLessThanEqualRecommendedOrderedAsc = dataLoaderService.getActiveDataLoadersWithNumberOfAssignedFinancialInstrumentsLessThanEqualRecommendedOrderAsc();
-        List<DataLoaderModel> activeDataLoadersWithNumberOfFIsGreaterThanRecommendedOrderAsc = dataLoaderService.getActiveDataLoadersWithNumberOfAssignedFinancialInstrumentsGreaterThanRecommendedOrderAsc();
-
-        if (activeDataLoadersWithNumberOfFIsLessThanEqualRecommendedOrderedAsc.isEmpty()) {
-            assignFIstoDLs(unassignedFIs, activeDataLoadersWithNumberOfFIsGreaterThanRecommendedOrderAsc);
-        } else {
-            assignFIstoDLs(unassignedFIs, activeDataLoadersWithNumberOfFIsLessThanEqualRecommendedOrderedAsc);
-        }
+        List<FinancialInstrumentModel> unassignedFIs = new LinkedList<>(getFinancialInstrumentsUnassignedToAnyDataLoader());
+        List<DataLoaderModel> activeDataLoaders = new LinkedList<>(dataLoaderService.getActiveDataLoaders());
+        assignFIsToDLs(unassignedFIs, activeDataLoaders);
     }
 
-    @Transactional
-    public void assignFIstoDLs(List<FinancialInstrumentModel> financialInstrumentModels, List<DataLoaderModel> dataLoaderModels) {
-        int sizeOfDataLoaderList = dataLoaderModels.size();
-        int indexOfDLforFIassignement = 1;
+    private void assignFIsToDLs(List<FinancialInstrumentModel> financialInstrumentModelList, List<DataLoaderModel> dataLoaderModelList) {
+        if (financialInstrumentModelList.isEmpty() || dataLoaderModelList.isEmpty()) {
+            log.debug("Financial Instrument list or Data Loaders list is empty. Cannot assign FIs to DLs.");
+            return;
+        }
+        int sizeOfDataLoaderList = dataLoaderModelList.size();
+        int indexOfDLforFIassignement = 0;
 
-        while (!financialInstrumentModels.isEmpty()) {
-            FinancialInstrumentModel fItoBeAssigned = financialInstrumentModels.getFirst();
-            DataLoaderModel dataLoader;
-            if (indexOfDLforFIassignement <= sizeOfDataLoaderList) {
-                dataLoader = dataLoaderModels.get(indexOfDLforFIassignement);
-            } else {
-                dataLoader = dataLoaderModels.get(indexOfDLforFIassignement - sizeOfDataLoaderList);
-            }
-            fItoBeAssigned.setDataLoader(dataLoader);
-            financialInstrumentModels.removeFirst();
+        if (sizeOfDataLoaderList == 1) {
+            log.debug("There is one available Data Loader (id={}, uuid={}). Assigning {} Financial Instruments into it.",
+                    dataLoaderModelList.getFirst().getId(), dataLoaderModelList.getFirst().getUuid(), financialInstrumentModelList.size());
+            DataLoaderModel dataLoader = dataLoaderModelList.getFirst();
+            financialInstrumentModelList.forEach(financialInstrumentModel -> {
+                financialInstrumentModel.setDataLoaderId(dataLoader.getId());
+                update(financialInstrumentModel);
+            });
+            return;
+        }
+        while (!financialInstrumentModelList.isEmpty()) {
+            FinancialInstrumentModel financialInstrumentModel = financialInstrumentModelList.getFirst();
+            DataLoaderModel dataLoader = dataLoaderModelList.get(indexOfDLforFIassignement);
+            financialInstrumentModel.setDataLoaderId(dataLoader.getId());
+            log.debug("Assigned Data Loader with id {} to Financial Instrument {}",
+                    dataLoader.getId(), financialInstrumentModel.getName());
+            update(financialInstrumentModel);
+            financialInstrumentModelList.removeFirst();
             indexOfDLforFIassignement++;
+            if (indexOfDLforFIassignement == sizeOfDataLoaderList - 1) {
+                indexOfDLforFIassignement = 0;
+                log.info("Starting another round of reassigning Financial Instruments to Data Loaders.");
+            }
         }
-    }
-
-    public void unassignFromDataLoader(DataLoaderModel dataLoaderModel) {
-        financialInstrumentRepository.unassignFromDataLoader(dataLoaderModel.getId());
-        log.info("Unassigned all Financial Instruments from data loader with id {} and uuid {}", dataLoaderModel.getId(), dataLoaderModel.getUuid());
     }
 
     private boolean areThereAnyFinancialInstrumentsUnassignedToAnyDataLoader() {
@@ -68,7 +83,7 @@ public class FinancialInstrumentService {
     }
 
     private Collection<FinancialInstrumentModel> getFinancialInstrumentsUnassignedToAnyDataLoader() {
-        return financialInstrumentRepository.findAllUnassignedToAnyDataLoader();
+        return financialInstrumentRepository.find5UnassignedToAnyDataLoader();
     }
 
 }

@@ -29,10 +29,11 @@ interface DataLoaderJpaRepository extends JpaRepository<DataLoaderEntity, Long> 
 
     boolean existsByUuid(String uuid);
 
-    List<DataLoaderEntity> findByLastConnectedOnGreaterThanEqual(Instant instant);
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    List<DataLoaderEntity> findTop5ByActiveTrue();
 
-    @Lock(value = LockModeType.PESSIMISTIC_READ)
-    List<DataLoaderEntity> findByLastConnectedOnLessThanEqualLimit5(Instant instant);
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    List<DataLoaderEntity> findTop5ByLastConnectedOnLessThan(Instant instant);
 
     List<DataLoaderEntity> findByLastConnectedOnGreaterThanAndLastHandledOnLessThanEqual(Instant lastConnectedOn, Instant firstHandledOn);
 

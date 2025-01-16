@@ -114,12 +114,12 @@ public class DataLoaderService {
         }
     }
 
-    public Collection<DataLoaderModel> get5InactiveDataLoaders() {
+    public Collection<DataLoaderModel> getInactiveDataLoaders() {
         return dataLoaderRepository.find5InactiveDataLoaders(Duration.ofSeconds(TIME_THRESHOLD_OF_HEALTH_MILS));
     }
 
-    public Collection<DataLoaderModel> getAllActiveDataLoaders() {
-        return dataLoaderRepository.findAllActiveDataLoaders(Duration.ofSeconds(TIME_THRESHOLD_OF_HEALTH_MILS));
+    public Collection<DataLoaderModel> getActiveDataLoaders() {
+        return dataLoaderRepository.find5ActiveDataLoaders();
     }
 
     public Collection<DataLoaderModel> getAllActiveAndUnhandledDataLoaders() {

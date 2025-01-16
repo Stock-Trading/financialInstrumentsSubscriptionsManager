@@ -5,7 +5,6 @@ import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.mod
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -13,42 +12,36 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 class DataMapper {
 
+    //TODO rozdzielić DataMapper pod każdą encję
     private final FinancialInstrumentJpaRepository financialInstrumentJpaRepository;
 
     FinancialInstrumentModel mapToFinancialInstrumentModel(FinancialInstrumentEntity entity) {
-        DataLoaderEntity dataLoaderEntity = entity.getDataLoader();
-        if (Objects.isNull(dataLoaderEntity)) {
-            return FinancialInstrumentModel.builder()
-                    .id(entity.getId())
-                    .name(entity.getName())
-                    .symbol(entity.getSymbol())
-                    .build();
-        }
         return FinancialInstrumentModel.builder()
                 .id(entity.getId())
                 .name(entity.getName())
                 .symbol(entity.getSymbol())
-                .dataLoader(mapToDataLoaderModel(dataLoaderEntity))
+                .dataLoaderId(entity.getDataLoaderId())
                 .build();
     }
 
     FinancialInstrumentEntity mapToFinancialInstrumentEntity(FinancialInstrumentModel model) {
-        if (Objects.isNull(model.getDataLoader())) {
-            return FinancialInstrumentEntity.builder()
-                    .id(model.getId())
-                    .name(model.getName())
-                    .symbol(model.getSymbol())
-                    .build();
-        }
         return FinancialInstrumentEntity.builder()
+                .id(model.getId())
                 .name(model.getName())
                 .symbol(model.getSymbol())
-                .dataLoader(mapToDataLoaderEntity(model.getDataLoader()))
+                .dataLoaderId(model.getDataLoaderId())
                 .build();
     }
 
     DataLoaderModel mapToDataLoaderModel(DataLoaderEntity entity) {
-        Collection<FinancialInstrumentEntity> financialInstrumentEntityCollection = financialInstrumentJpaRepository.findByDataLoaderId(entity.getId());
+        if (Objects.isNull(entity.getFinancialInstrument())) {
+            return DataLoaderModel.builder()
+                    .id(entity.getId())
+                    .uuid(entity.getUuid())
+                    .lastConnectedOn(entity.getLastConnectedOn())
+                    .active(entity.getActive())
+                    .build();
+        }
         return DataLoaderModel.builder()
                 .id(entity.getId())
                 .uuid(entity.getUuid())

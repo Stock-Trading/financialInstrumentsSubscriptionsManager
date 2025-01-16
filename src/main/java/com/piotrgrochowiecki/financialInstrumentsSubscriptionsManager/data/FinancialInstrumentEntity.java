@@ -27,10 +27,9 @@ public class FinancialInstrumentEntity {
     @CreationTimestamp
     @Column(name = "created_on", nullable = false, updatable = false)
     Instant createdOn;
+    @Column(name = "data_loader_id")
+    Long dataLoaderId;
     @ManyToOne
-    @JoinColumns({
-            @JoinColumn(name = "data_loader_id", referencedColumnName = "id"),
-            @JoinColumn(name = "data_loader_uuid", referencedColumnName = "uuid")}
-    )
+    @JoinColumn(name = "data_loader_id", referencedColumnName = "id", insertable = false, updatable = false)
     DataLoaderEntity dataLoader;
 }
