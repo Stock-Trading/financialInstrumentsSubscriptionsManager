@@ -14,7 +14,7 @@ import java.util.Collection;
 public class FinancialInstrumentRepositoryImpl implements FinancialInstrumentRepository {
 
     private final FinancialInstrumentJpaRepository jpaRepository;
-    private final DataMapper mapper;
+    private final FinancialInstrumentMapper mapper;
 
     @Override
     public FinancialInstrumentModel save(FinancialInstrumentModel financialInstrumentModel) {
