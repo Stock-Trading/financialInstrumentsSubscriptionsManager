@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 class DataLoaderController {
 
     private final DataLoaderService dataLoaderService;
-    private final ApiMapper mapper;
+    private final DataLoaderMapper mapper;
 
     @PostMapping("/{dataLoaderUuid}")
     ResponseEntity<DataLoaderResponseDto> handleRegistrationRequest(@PathVariable String dataLoaderUuid) {

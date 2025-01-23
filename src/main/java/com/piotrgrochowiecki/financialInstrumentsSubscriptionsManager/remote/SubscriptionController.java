@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 class SubscriptionController {
 
     private final SubscriptionService subscriptionService;
-    private final ApiMapper mapper;
+    private final SubscriptionMapper mapper;
 
     @GetMapping("/{dataLoaderUuid}")
     SubscriptionResponseDto handleSubscriptionRequest(@PathVariable String dataLoaderUuid) {
