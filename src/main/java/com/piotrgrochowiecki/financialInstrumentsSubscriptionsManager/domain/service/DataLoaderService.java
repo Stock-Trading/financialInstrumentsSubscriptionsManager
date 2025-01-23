@@ -29,6 +29,14 @@ public class DataLoaderService {
     private static final Duration TIME_THRESHOLD_OF_HANDLING_READINESS = Duration.ofSeconds(15);
 
     @Transactional
+    private DataLoaderModel update(DataLoaderModel dataLoaderModel) {
+        if (Objects.isNull(dataLoaderModel.getId())) {
+            throw new RuntimeException("Cannot update Data Loader as its id is null");
+        }
+        return dataLoaderRepository.save(dataLoaderModel);
+    }
+
+    @Transactional
     public DataLoaderModel register(String dataLoaderUuid) {
         if (dataLoaderRepository.existsByUuid(dataLoaderUuid)) {
             log.error("Data loader with uuid {} has already been registered", dataLoaderUuid);
@@ -71,14 +79,6 @@ public class DataLoaderService {
                     numberOfFIsAssigned, loadStatus, RECOMMENDED_NUMBER_OF_FINANCIAL_INSTRUMENTS);
             update(dataLoader);
         });
-    }
-
-    @Transactional
-    private DataLoaderModel update(DataLoaderModel dataLoaderModel) {
-        if (Objects.isNull(dataLoaderModel.getId())) {
-            throw new RuntimeException("Cannot update Data Loader as its id is null");
-        }
-        return dataLoaderRepository.save(dataLoaderModel);
     }
 
     /**
@@ -153,14 +153,6 @@ public class DataLoaderService {
 
     public DataLoaderModel getByUuid(String dataLoaderUuid) {
         return dataLoaderRepository.findByUuid(dataLoaderUuid);
-    }
-
-    public List<DataLoaderModel> getActiveDataLoadersWithNumberOfAssignedFinancialInstrumentsGreaterThanRecommendedOrderAsc() {
-        return dataLoaderRepository.findAllWithNumberOfAssignedFinancialInstrumentsGreaterThanRecommendedAndLastConnectedOnGreaterThanOrderAscByFinancialInstrumentCount(RECOMMENDED_NUMBER_OF_FINANCIAL_INSTRUMENTS, Duration.ofMillis(TIME_THRESHOLD_OF_HEALTH_MILS));
-    }
-
-    public List<DataLoaderModel> getActiveDataLoadersWithNumberOfAssignedFinancialInstrumentsLessThanEqualRecommendedOrderAsc() {
-        return dataLoaderRepository.findAllWithNumberOfAssignedFinancialInstrumentsLessThanEqualRecommendedAndLastConnectedOnGreaterThanOrderAscByFinancialInstrumentCount(RECOMMENDED_NUMBER_OF_FINANCIAL_INSTRUMENTS, Duration.ofMillis(TIME_THRESHOLD_OF_HEALTH_MILS));
     }
 
 }
