@@ -14,33 +14,49 @@ class DataLoaderMapper {
     private final FinancialInstrumentMapper financialInstrumentMapper;
 
     DataLoaderModel mapToDataLoaderModel(DataLoaderEntity entity) {
-        if (Objects.isNull(entity.getFinancialInstrument())) {
-            return DataLoaderModel.builder()
-                    .id(entity.getId())
-                    .uuid(entity.getUuid())
-                    .lastConnectedOn(entity.getLastConnectedOn())
-                    .active(entity.getActive())
-                    .build();
-        }
-        return DataLoaderModel.builder()
+        DataLoaderModel model = DataLoaderModel.builder()
                 .id(entity.getId())
                 .uuid(entity.getUuid())
                 .lastConnectedOn(entity.getLastConnectedOn())
+                .lastHandledOn(entity.getLastHandledOn())
                 .active(entity.getActive())
-                .financialInstrumentModelCollection(entity.getFinancialInstrument().stream()
-                        .map(financialInstrumentMapper::mapToFinancialInstrumentModel)
-                        .collect(Collectors.toList())
-                )
                 .build();
+
+        DataLoaderEntity.DataLoaderLoadStatus entityLoadStatus = entity.getLoadStatus();
+        if (!Objects.isNull(entityLoadStatus)) {
+            switch (entityLoadStatus) {
+                case TOO_LOW -> model.setLoadStatus(DataLoaderModel.DataLoaderLoadStatus.TOO_LOW);
+                case TOO_HIGH -> model.setLoadStatus(DataLoaderModel.DataLoaderLoadStatus.TOO_HIGH);
+                case BALANCED -> model.setLoadStatus(DataLoaderModel.DataLoaderLoadStatus.BALANCED);
+            }
+        }
+        if (!Objects.isNull(entity.getFinancialInstrument())) {
+            model.setFinancialInstrumentModelCollection(entity.getFinancialInstrument().stream()
+                    .map(financialInstrumentMapper::mapToFinancialInstrumentModel)
+                    .collect(Collectors.toList())
+            );
+        }
+        return model;
     }
 
     DataLoaderEntity mapToDataLoaderEntity(DataLoaderModel model) {
-        return DataLoaderEntity.builder()
+        DataLoaderEntity entity = DataLoaderEntity.builder()
                 .id(model.getId())
                 .uuid(model.getUuid())
                 .lastConnectedOn(model.getLastConnectedOn())
+                .lastHandledOn(model.getLastHandledOn())
                 .active(model.getActive())
                 .build();
+
+        DataLoaderModel.DataLoaderLoadStatus modelLoadStatus = model.getLoadStatus();
+        if (!Objects.isNull(model.getLoadStatus())) {
+            switch (modelLoadStatus) {
+                case TOO_LOW -> entity.setLoadStatus(DataLoaderEntity.DataLoaderLoadStatus.TOO_LOW);
+                case TOO_HIGH -> entity.setLoadStatus(DataLoaderEntity.DataLoaderLoadStatus.TOO_HIGH);
+                case BALANCED -> entity.setLoadStatus(DataLoaderEntity.DataLoaderLoadStatus.BALANCED);
+            }
+        }
+        return entity;
     }
 
 }

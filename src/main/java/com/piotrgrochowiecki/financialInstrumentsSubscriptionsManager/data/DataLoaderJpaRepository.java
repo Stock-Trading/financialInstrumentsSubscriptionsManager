@@ -1,9 +1,9 @@
 package com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.data;
 
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.QueryHint;
 import jakarta.transaction.Transactional;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
@@ -12,6 +12,7 @@ import java.util.Optional;
 
 interface DataLoaderJpaRepository extends JpaRepository<DataLoaderEntity, Long> {
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<DataLoaderEntity> findByUuid(String uuid);
 
     @Query(value = "SELECT COUNT(d) " +
@@ -30,12 +31,23 @@ interface DataLoaderJpaRepository extends JpaRepository<DataLoaderEntity, Long> 
     boolean existsByUuid(String uuid);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    List<DataLoaderEntity> findTop5ByActiveTrue();
+    @QueryHints(value = {
+            @QueryHint(name = "jakarta.persistence.lock.timeout", value = "-2")
+    })
+    List<DataLoaderEntity> findTop5ByActiveTrueOrderByLastConnectedOnAsc();
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @QueryHints(value = {
+            @QueryHint(name = "jakarta.persistence.lock.timeout", value = "-2")
+    })
     List<DataLoaderEntity> findTop5ByLastConnectedOnLessThan(Instant instant);
 
-    List<DataLoaderEntity> findByLastConnectedOnGreaterThanAndLastHandledOnLessThanEqual(Instant lastConnectedOn, Instant firstHandledOn);
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @QueryHints(value = {
+            @QueryHint(name = "jakarta.persistence.lock.timeout", value = "-2")
+    })
+    List<DataLoaderEntity> findTop5ByLastConnectedOnGreaterThanAndLastHandledOnLessThanEqual(Instant lastConnectedOn,
+                                                                                             Instant firstHandledOn);
 
     @Query(value = "SELECT * " +
             "FROM data_loader dl " +

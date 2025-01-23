@@ -17,12 +17,12 @@ public interface DataLoaderRepository {
 
     DataLoaderModel findByUuid(String dataLoaderUUID);
 
-    Collection<DataLoaderModel> find5ActiveDataLoaders();
+    Collection<DataLoaderModel> find5OldestAndActiveDataLoaders();
 
     Collection<DataLoaderModel> find5InactiveDataLoaders(Duration timeFromLastConnectionAsHealthThreshold);
 
-    Collection<DataLoaderModel> findAllActiveAndUnhandledDataLoaders(Duration timeFromLastConnectionAsHealthThreshold,
-                                                                     Duration timeFromLastHandledTimeAsUnhandledThreshold);
+    Collection<DataLoaderModel> find5ActiveAndUnhandledDataLoaders(Duration timeFromLastConnectionAsHealthThreshold,
+                                                                   Duration timeFromLastHandledTimeAsUnhandledThreshold);
 
     List<DataLoaderModel> findAllWithNumberOfAssignedFinancialInstrumentsGreaterThanRecommendedAndLastConnectedOnGreaterThanOrderAscByFinancialInstrumentCount(Integer recommendedNumberOfFinancialInstrumentsPerDataLoader,
                                                                                                                                                                Duration timeFromLastConnectionAsHealthThreshold);

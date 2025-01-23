@@ -1,7 +1,6 @@
 package com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.service;
 
 import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.exception.ModelAlreadyExistsException;
-import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.exception.ModelNotFoundException;
 import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.model.DataLoaderModel;
 import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.model.FinancialInstrumentModel;
 import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.ports.DataLoaderRepository;
@@ -19,9 +18,9 @@ import java.util.*;
 @Log4j2
 public class DataLoaderService {
 
-//    @Value("${dataloader.lastCheckInHealthThreshold.milisec}")
+    //    @Value("${dataloader.lastCheckInHealthThreshold.milisec}")
     private final Integer TIME_THRESHOLD_OF_HEALTH_MILS = 10_000;
-//    @Value("${dataloader.recommendedNumberOfFinancialInstruments}")
+    //    @Value("${dataloader.recommendedNumberOfFinancialInstruments}")
     private final Integer RECOMMENDED_NUMBER_OF_FINANCIAL_INSTRUMENTS = 5;
 
     private final DataLoaderRepository dataLoaderRepository;
@@ -35,50 +34,75 @@ public class DataLoaderService {
             log.error("Data loader with uuid {} has already been registered", dataLoaderUuid);
             throw new ModelAlreadyExistsException("Data loader with uuid " + dataLoaderUuid + " has already been registered");
         }
-        DataLoaderModel dataLoaderModel = new DataLoaderModel(null, dataLoaderUuid, timeService.getInstantUTC(), null, true, null);
+        DataLoaderModel dataLoaderModel = DataLoaderModel.builder()
+                .uuid(dataLoaderUuid)
+                .lastConnectedOn(timeService.getInstantUTC())
+                .build();
         return dataLoaderRepository.save(dataLoaderModel);
     }
 
     @Transactional
     public DataLoaderModel checkIn(String dataLoaderUuid) {
-        if (dataLoaderRepository.existsByUuid(dataLoaderUuid)) {
-            dataLoaderRepository.updateDataLoaderLastConnectedOnTime(dataLoaderUuid, timeService.getInstantUTC());
-            return dataLoaderRepository.findByUuid(dataLoaderUuid);
-        } else {
-            log.error("Did not find data loader with uuid {}", dataLoaderUuid);
-            throw new ModelNotFoundException("Did not find data loader with uuid " + dataLoaderUuid);
-        }
+        DataLoaderModel dataLoaderModel = getByUuid(dataLoaderUuid);
+        dataLoaderModel.setLastConnectedOn(timeService.getInstantUTC());
+        dataLoaderModel.setActive(true);
+        return update(dataLoaderModel);
     }
 
+    @Scheduled(fixedDelay = 5000)
     @Transactional
-    public void update(DataLoaderModel dataLoaderModel) {
-        if (Objects.isNull(dataLoaderModel.getId())) {
-            throw new RuntimeException("Cannot update Data Loader as its id is null");
-        }
-        dataLoaderRepository.save(dataLoaderModel);
-    }
-
-    /**
-     * Regular method that checks for last check-in time of DataLoader. If that time is longer then specified threshold,
-     * unassigns FinancialInstrument from it.
-     */
-    @Transactional
-    @Scheduled(fixedDelay = 3000)
-    void checkHealth() {
-        log.debug("Running regular data loaders health check");
-        Collection<DataLoaderModel> inactiveDataLoaders = get5InactiveDataLoaders();
-        log.debug("Collection of inactive data loaders has {} elements in it", inactiveDataLoaders.size());
-        inactiveDataLoaders.forEach(dataLoader -> {
-            dataLoader.setFinancialInstrumentModelCollection(null);
+    void checkLoadStatus() {
+        log.debug("Starting regular task of checking load status of Data Loaders");
+        List<DataLoaderModel> dataLoaderModelList = getActiveDataLoaders().stream().toList();
+        dataLoaderModelList.forEach(dataLoader -> {
+            int numberOfFIsAssigned = dataLoader.getFinancialInstrumentModelCollection().size();
+            DataLoaderModel.DataLoaderLoadStatus loadStatus;
+            if (numberOfFIsAssigned == RECOMMENDED_NUMBER_OF_FINANCIAL_INSTRUMENTS) {
+                loadStatus = DataLoaderModel.DataLoaderLoadStatus.BALANCED;
+            } else if (numberOfFIsAssigned < RECOMMENDED_NUMBER_OF_FINANCIAL_INSTRUMENTS) {
+                loadStatus = DataLoaderModel.DataLoaderLoadStatus.TOO_LOW;
+            } else {
+                loadStatus = DataLoaderModel.DataLoaderLoadStatus.TOO_HIGH;
+            }
+            dataLoader.setLoadStatus(loadStatus);
+            dataLoader.setLastHandledOn(timeService.getInstantUTC()); //updates time of handling, so other services retrieve records with "oldest" lastHandledOn field
+            log.debug("Data Loader with id {} has {} Financial Instruments assigned to it and its load status is {}." +
+                    " Number of recommended financial instruments per data loader is {}.", dataLoader.getId(),
+                    numberOfFIsAssigned, loadStatus, RECOMMENDED_NUMBER_OF_FINANCIAL_INSTRUMENTS);
             update(dataLoader);
         });
     }
 
     @Transactional
-    @Scheduled(fixedDelay = 17_500)
+    private DataLoaderModel update(DataLoaderModel dataLoaderModel) {
+        if (Objects.isNull(dataLoaderModel.getId())) {
+            throw new RuntimeException("Cannot update Data Loader as its id is null");
+        }
+        return dataLoaderRepository.save(dataLoaderModel);
+    }
+
+    /**
+     * Regular method that checks for last check-in time of DataLoader. If that time is longer then specified threshold,
+     * unassigns FinancialInstrument from it and set its Active property to false.
+     */
+    @Transactional
+    @Scheduled(fixedDelay = 3000)
+    void checkActiveState() {
+        log.debug("Running regular data loaders health check");
+        Collection<DataLoaderModel> inactiveDataLoaders = getInactiveDataLoaders();
+        log.debug("Collection of inactive data loaders has {} elements in it", inactiveDataLoaders.size());
+        inactiveDataLoaders.forEach(dataLoader -> {
+            dataLoader.setFinancialInstrumentModelCollection(null);
+            dataLoader.setLoadStatus(null);
+            update(dataLoader);
+        });
+    }
+
+    @Transactional
+//    @Scheduled(fixedDelay = 17_500)
     void rebalanceDataLoaders() {
         log.info("Running regular rebalance of Data Loaders");
-        List<DataLoaderModel> allDataLoaders = getAllActiveAndUnhandledDataLoaders().stream().toList();
+        List<DataLoaderModel> allDataLoaders = getActiveAndUnhandledDataLoaders().stream().toList();
 
         List<DataLoaderModel> dataLoadersWithMoreFIsThanRecommended = allDataLoaders.stream()
                 .filter(dataLoaderModel -> dataLoaderModel.getFinancialInstrumentModelCollection().size() > RECOMMENDED_NUMBER_OF_FINANCIAL_INSTRUMENTS)
@@ -92,7 +116,7 @@ public class DataLoaderService {
         for (DataLoaderModel dataLoader : dataLoadersWithLessFIsThanRecommended) {
             int numberOfFIs = dataLoader.getFinancialInstrumentModelCollection().size();
             int freeSpots = Math.subtractExact(RECOMMENDED_NUMBER_OF_FINANCIAL_INSTRUMENTS, numberOfFIs);
-            totalNumberOfFreeSpots=+freeSpots;
+            totalNumberOfFreeSpots = +freeSpots;
         }
 
         List<FinancialInstrumentModel> FIsToBeReassigned = new ArrayList<>();
@@ -119,11 +143,12 @@ public class DataLoaderService {
     }
 
     public Collection<DataLoaderModel> getActiveDataLoaders() {
-        return dataLoaderRepository.find5ActiveDataLoaders();
+        return dataLoaderRepository.find5OldestAndActiveDataLoaders();
     }
 
-    public Collection<DataLoaderModel> getAllActiveAndUnhandledDataLoaders() {
-        return dataLoaderRepository.findAllActiveAndUnhandledDataLoaders(Duration.ofMillis(TIME_THRESHOLD_OF_HEALTH_MILS), TIME_THRESHOLD_OF_HANDLING_READINESS);
+    public Collection<DataLoaderModel> getActiveAndUnhandledDataLoaders() {
+        return dataLoaderRepository.find5ActiveAndUnhandledDataLoaders(Duration.ofMillis(TIME_THRESHOLD_OF_HEALTH_MILS),
+                TIME_THRESHOLD_OF_HANDLING_READINESS);
     }
 
     public DataLoaderModel getByUuid(String dataLoaderUuid) {

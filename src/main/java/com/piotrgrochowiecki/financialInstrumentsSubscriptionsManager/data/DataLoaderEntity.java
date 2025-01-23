@@ -28,9 +28,17 @@ public class DataLoaderEntity {
     Instant lastHandledOn;
     @Column(name = "active", nullable = false)
     Boolean active;
+    @Column(name = "load_status")
+    @Enumerated(EnumType.STRING)
+    DataLoaderLoadStatus loadStatus;
     @OneToMany(cascade = CascadeType.ALL,
             fetch = FetchType.LAZY,
             mappedBy = "dataLoader")
     Collection<FinancialInstrumentEntity> financialInstrument;
 
+    enum DataLoaderLoadStatus {
+        TOO_HIGH,
+        TOO_LOW,
+        BALANCED;
+    }
 }

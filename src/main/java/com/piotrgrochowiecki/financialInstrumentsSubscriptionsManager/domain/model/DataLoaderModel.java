@@ -19,14 +19,12 @@ public class DataLoaderModel {
     private Instant lastConnectedOn;
     private Instant lastHandledOn;
     private Boolean active;
+    private DataLoaderLoadStatus loadStatus;
     private Collection<FinancialInstrumentModel> financialInstrumentModelCollection;
 
-    public DataLoaderModel(Long id, String uuid, Instant lastConnectedOn, Instant lastHandledOn, Boolean active, Collection<FinancialInstrumentModel> financialInstrumentModelCollection) {
-        this.id = id;
-        this.uuid = uuid;
-        this.lastConnectedOn = lastConnectedOn;
-        this.lastHandledOn = lastHandledOn;
-        this.active = active;
-        this.financialInstrumentModelCollection = financialInstrumentModelCollection;
+    public enum DataLoaderLoadStatus {
+        TOO_HIGH,
+        TOO_LOW,
+        BALANCED;
     }
 }
