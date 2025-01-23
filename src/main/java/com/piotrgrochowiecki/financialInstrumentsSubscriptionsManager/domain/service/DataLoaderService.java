@@ -86,7 +86,7 @@ public class DataLoaderService {
      * unassigns FinancialInstrument from it and set its Active property to false.
      */
     @Transactional
-    @Scheduled(fixedDelay = 3000)
+//    @Scheduled(fixedDelay = 3000)
     void checkActiveState() {
         log.debug("Running regular data loaders health check");
         Collection<DataLoaderModel> inactiveDataLoaders = getInactiveDataLoaders();

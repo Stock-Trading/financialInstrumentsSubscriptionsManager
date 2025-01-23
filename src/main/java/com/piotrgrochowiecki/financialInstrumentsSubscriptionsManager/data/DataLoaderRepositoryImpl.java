@@ -32,13 +32,6 @@ public class DataLoaderRepositoryImpl implements DataLoaderRepository {
     }
 
     @Override
-    @Transactional
-    public void updateDataLoaderLastConnectedOnTime(String dataLoaderUuid, Instant lastConnectedOn) {
-        jpaRepository.updateDataLoaderLastConnectedOnTime(dataLoaderUuid, lastConnectedOn);
-        log.info("Updated data loader with uuid {}. Last connected on {}", dataLoaderUuid, LocalDateTime.ofInstant(lastConnectedOn, ZoneOffset.UTC));
-    }
-
-    @Override
     public DataLoaderModel findByUuid(String dataLoaderUUID) {
         Optional<DataLoaderEntity> dataLoaderEntityOptional = jpaRepository.findByUuid(dataLoaderUUID);
         if (dataLoaderEntityOptional.isPresent()) {
@@ -67,22 +60,6 @@ public class DataLoaderRepositoryImpl implements DataLoaderRepository {
         Instant lastInstantCountingAsHealthy = timeService.getInstantUTC().minus(timeFromLastConnectionAsHealthThreshold);
         Instant firstInstantCountingAsUnhandled = timeService.getInstantUTC().minus(timeFromLastHandledTimeAsUnhandledThreshold);
         return jpaRepository.findTop5ByLastConnectedOnGreaterThanAndLastHandledOnLessThanEqual(lastInstantCountingAsHealthy, firstInstantCountingAsUnhandled).stream()
-                .map(mapper::mapToDataLoaderModel)
-                .toList();
-    }
-
-    @Override
-    public List<DataLoaderModel> findAllWithNumberOfAssignedFinancialInstrumentsGreaterThanRecommendedAndLastConnectedOnGreaterThanOrderAscByFinancialInstrumentCount(Integer recommendedNumberOfFinancialInstrumentsPerDataLoader, Duration timeFromLastConnectionAsHealthThreshold) {
-        Instant lastInstantCountingAsHealthy = timeService.getInstantUTC().minus(timeFromLastConnectionAsHealthThreshold);
-        return jpaRepository.findAllWithNumberOfAssignedFinancialInstrumentsGreaterThanRecommendedOrderAsc(recommendedNumberOfFinancialInstrumentsPerDataLoader).stream()
-                .map(mapper::mapToDataLoaderModel)
-                .toList();
-    }
-
-    @Override
-    public List<DataLoaderModel> findAllWithNumberOfAssignedFinancialInstrumentsLessThanEqualRecommendedAndLastConnectedOnGreaterThanOrderAscByFinancialInstrumentCount(Integer recommendedNumberOfFinancialInstrumentsPerDataLoader, Duration timeFromLastConnectionAsHealthThreshold) {
-        Instant lastInstantCountingAsHealthy = timeService.getInstantUTC().minus(timeFromLastConnectionAsHealthThreshold);
-        return jpaRepository.findAllWithNumberOfAssignedFinancialInstrumentsLessThanEqualRecommendedAndLastConnectedOnGreaterThanOrderAscByFinancialInstrumentCount(recommendedNumberOfFinancialInstrumentsPerDataLoader, lastInstantCountingAsHealthy).stream()
                 .map(mapper::mapToDataLoaderModel)
                 .toList();
     }
