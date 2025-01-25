@@ -19,7 +19,7 @@ import java.util.Optional;
 public class DataLoaderRepositoryImpl implements DataLoaderRepository {
 
     private final DataLoaderJpaRepository jpaRepository;
-    private final DataLoaderMapper mapper;
+    private final DataLoaderEntityMapper mapper;
     private final TimeService timeService;
 
     @Override

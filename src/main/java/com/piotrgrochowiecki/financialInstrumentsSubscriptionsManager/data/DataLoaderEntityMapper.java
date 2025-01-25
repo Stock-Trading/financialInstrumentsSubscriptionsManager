@@ -9,9 +9,9 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
-class DataLoaderMapper {
+class DataLoaderEntityMapper {
 
-    private final FinancialInstrumentMapper financialInstrumentMapper;
+    private final FinancialInstrumentEntityMapper financialInstrumentEntityMapper;
 
     DataLoaderModel mapToDataLoaderModel(DataLoaderEntity entity) {
         DataLoaderModel model = DataLoaderModel.builder()
@@ -32,7 +32,7 @@ class DataLoaderMapper {
         }
         if (!Objects.isNull(entity.getFinancialInstrument())) {
             model.setFinancialInstrumentModelCollection(entity.getFinancialInstrument().stream()
-                    .map(financialInstrumentMapper::mapToFinancialInstrumentModel)
+                    .map(financialInstrumentEntityMapper::mapToFinancialInstrumentModel)
                     .collect(Collectors.toList())
             );
         }

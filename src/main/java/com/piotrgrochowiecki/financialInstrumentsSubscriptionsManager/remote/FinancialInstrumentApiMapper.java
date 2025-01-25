@@ -4,7 +4,7 @@ import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.mod
 import org.springframework.stereotype.Component;
 
 @Component
-class FinancialInstrumentMapper {
+class FinancialInstrumentApiMapper {
 
     FinancialInstrumentResponseDto mapToDto(FinancialInstrumentModel model) {
         return FinancialInstrumentResponseDto.builder()

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-class FinancialInstrumentMapper {
+class FinancialInstrumentEntityMapper {
 
     FinancialInstrumentModel mapToFinancialInstrumentModel(FinancialInstrumentEntity entity) {
         return FinancialInstrumentModel.builder()

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 class SubscriptionMapper {
 
-    private final FinancialInstrumentMapper apiMapper;
+    private final FinancialInstrumentApiMapper apiMapper;
 
     SubscriptionResponseDto mapToDto(SubscriptionModel model) {
         return SubscriptionResponseDto.builder()
