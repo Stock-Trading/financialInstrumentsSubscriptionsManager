@@ -28,6 +28,8 @@ class DataLoaderEntity {
     Instant lastHandledOn;
     @Column(name = "active", nullable = false)
     Boolean active;
+    @Column(name = "ready_for_handling", nullable = false)
+    Boolean readyForHandling;
     @Column(name = "load_status")
     @Enumerated(EnumType.STRING)
     DataLoaderLoadStatus loadStatus;

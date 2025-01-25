@@ -19,12 +19,13 @@ public class DataLoaderModel {
     private Instant lastConnectedOn;
     private Instant lastHandledOn;
     private Boolean active;
+    private Boolean readyForHandling;
     private DataLoaderLoadStatus loadStatus;
     private Collection<FinancialInstrumentModel> financialInstrumentModelCollection;
 
     public enum DataLoaderLoadStatus {
         TOO_HIGH,
         TOO_LOW,
-        BALANCED;
+        BALANCED
     }
 }

@@ -19,6 +19,7 @@ class DataLoaderEntityMapper {
                 .uuid(entity.getUuid())
                 .lastConnectedOn(entity.getLastConnectedOn())
                 .lastHandledOn(entity.getLastHandledOn())
+                .readyForHandling(entity.getReadyForHandling())
                 .active(entity.getActive())
                 .build();
 
@@ -46,6 +47,7 @@ class DataLoaderEntityMapper {
                 .lastConnectedOn(model.getLastConnectedOn())
                 .lastHandledOn(model.getLastHandledOn())
                 .active(model.getActive())
+                .readyForHandling(model.getReadyForHandling())
                 .build();
 
         DataLoaderModel.DataLoaderLoadStatus modelLoadStatus = model.getLoadStatus();
