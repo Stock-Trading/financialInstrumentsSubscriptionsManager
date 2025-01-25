@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 
 @Service
@@ -19,14 +20,14 @@ import java.util.*;
 public class DataLoaderService {
 
     //    @Value("${dataloader.lastCheckInHealthThreshold.milisec}")
-    private final Integer TIME_THRESHOLD_OF_HEALTH_MILS = 10_000;
+    private final Integer TIME_THRESHOLD_OF_HEALTH_MILLS = 10_000;
     //    @Value("${dataloader.recommendedNumberOfFinancialInstruments}")
     private final Integer RECOMMENDED_NUMBER_OF_FINANCIAL_INSTRUMENTS = 5;
 
     private final DataLoaderRepository dataLoaderRepository;
     private final TimeService timeService;
 
-    private static final Duration TIME_THRESHOLD_OF_HANDLING_READINESS = Duration.ofSeconds(15);
+    private final Integer TIME_THRESHOLD_OF_HANDLING_READINESS_MILLS = 15_000;
 
     @Transactional
     private DataLoaderModel update(DataLoaderModel dataLoaderModel) {
@@ -54,13 +55,58 @@ public class DataLoaderService {
         DataLoaderModel dataLoaderModel = getByUuid(dataLoaderUuid);
         dataLoaderModel.setLastConnectedOn(timeService.getInstantUTC());
         dataLoaderModel.setActive(true);
+        dataLoaderModel.setReadyForHandling(true);
         return update(dataLoaderModel);
     }
 
-    @Scheduled(fixedDelay = 5000)
+    /**
+     * Regular method that checks for last check-in time of DataLoader. If that time is longer then specified threshold,
+     * unassigns FinancialInstrument from it and sets its Active property to false.
+     */
+    @Transactional
+    @Scheduled(fixedDelay = 3000)
+    void checkActiveState() {
+        log.debug("Running regular data loaders active state check");
+        Collection<DataLoaderModel> dataLoaders = getActiveDataLoaders();
+        dataLoaders.forEach(dataLoader -> {
+            Instant lastInstantCountingAsHealthy = timeService.getInstantUTC()
+                    .minus(Duration.ofMillis(TIME_THRESHOLD_OF_HANDLING_READINESS_MILLS));
+            if (dataLoader.getLastConnectedOn().isBefore(lastInstantCountingAsHealthy)) {
+                log.debug("Data Loader id={}, uuid={} last connected on {}, which is before last instant counting" +
+                                " as healthy. Setting its loadStatus and Financial Instrument Collection to null and" +
+                                " Active to false. Threshold of healthy is set to {} milliseconds",
+                        dataLoader.getId(), dataLoader.getUuid(), dataLoader.getLastConnectedOn(), TIME_THRESHOLD_OF_HEALTH_MILLS);
+                dataLoader.setFinancialInstrumentModelCollection(null);
+                dataLoader.setLoadStatus(null);
+                dataLoader.setActive(false);
+                dataLoader.setReadyForHandling(false);
+                update(dataLoader);
+            }
+        });
+    }
+
+    @Transactional
+    @Scheduled(fixedDelay = 4000)
+    void checkReadyForHandlingStatus() {
+        log.debug("Running regular data loaders readiness for handling check");
+        Collection<DataLoaderModel> dataLoaders = getReadyForHandlingDataLoaders();
+        dataLoaders.forEach(dataLoader -> {
+            Instant lastInstantCountingAsReadyForHandling = timeService.getInstantUTC()
+                    .minus(Duration.ofMillis(TIME_THRESHOLD_OF_HANDLING_READINESS_MILLS));
+            if (dataLoader.getLastConnectedOn().isBefore(lastInstantCountingAsReadyForHandling)) {
+                log.debug("Data Loader id={}, uuid={} last connected on {}, which is before last instant counting" +
+                                " as Ready for Handling to false. Threshold of read for handling readiness is set to {} milliseconds",
+                        dataLoader.getId(), dataLoader.getUuid(), dataLoader.getLastConnectedOn(), TIME_THRESHOLD_OF_HANDLING_READINESS_MILLS);
+                dataLoader.setReadyForHandling(false);
+                update(dataLoader);
+            }
+        });
+    }
+
+    //    @Scheduled(fixedDelay = 5000)
     @Transactional
     void checkLoadStatus() {
-        log.debug("Starting regular task of checking load status of Data Loaders");
+        log.debug("Running regular Data Loaders load status check");
         List<DataLoaderModel> dataLoaderModelList = getActiveDataLoaders().stream().toList();
         dataLoaderModelList.forEach(dataLoader -> {
             int numberOfFIsAssigned = dataLoader.getFinancialInstrumentModelCollection().size();
@@ -81,27 +127,10 @@ public class DataLoaderService {
         });
     }
 
-    /**
-     * Regular method that checks for last check-in time of DataLoader. If that time is longer then specified threshold,
-     * unassigns FinancialInstrument from it and set its Active property to false.
-     */
     @Transactional
-//    @Scheduled(fixedDelay = 3000)
-    void checkActiveState() {
-        log.debug("Running regular data loaders health check");
-        Collection<DataLoaderModel> inactiveDataLoaders = getInactiveDataLoaders();
-        log.debug("Collection of inactive data loaders has {} elements in it", inactiveDataLoaders.size());
-        inactiveDataLoaders.forEach(dataLoader -> {
-            dataLoader.setFinancialInstrumentModelCollection(null);
-            dataLoader.setLoadStatus(null);
-            update(dataLoader);
-        });
-    }
-
-    @Transactional
-//    @Scheduled(fixedDelay = 17_500)
+    @Scheduled(fixedDelay = 17_500)
     void rebalanceDataLoaders() {
-        log.info("Running regular rebalance of Data Loaders");
+        log.debug("Running regular task of re-balancing Financial Instruments assigned to Data Loaders");
         List<DataLoaderModel> allDataLoaders = getActiveAndUnhandledDataLoaders().stream().toList();
 
         List<DataLoaderModel> dataLoadersWithMoreFIsThanRecommended = allDataLoaders.stream()
@@ -139,16 +168,20 @@ public class DataLoaderService {
     }
 
     public Collection<DataLoaderModel> getInactiveDataLoaders() {
-        return dataLoaderRepository.find5InactiveDataLoaders(Duration.ofSeconds(TIME_THRESHOLD_OF_HEALTH_MILS));
+        return dataLoaderRepository.find5InactiveDataLoaders(Duration.ofSeconds(TIME_THRESHOLD_OF_HEALTH_MILLS));
     }
 
     public Collection<DataLoaderModel> getActiveDataLoaders() {
         return dataLoaderRepository.find5OldestAndActiveDataLoaders();
     }
 
+    public Collection<DataLoaderModel> getReadyForHandlingDataLoaders() {
+        return dataLoaderRepository.find5OldestAndReadyForHandling();
+    }
+
     public Collection<DataLoaderModel> getActiveAndUnhandledDataLoaders() {
-        return dataLoaderRepository.find5ActiveAndUnhandledDataLoaders(Duration.ofMillis(TIME_THRESHOLD_OF_HEALTH_MILS),
-                TIME_THRESHOLD_OF_HANDLING_READINESS);
+        return dataLoaderRepository.find5ActiveAndUnhandledDataLoaders(Duration.ofMillis(TIME_THRESHOLD_OF_HEALTH_MILLS),
+                Duration.ofMillis(TIME_THRESHOLD_OF_HANDLING_READINESS_MILLS));
     }
 
     public DataLoaderModel getByUuid(String dataLoaderUuid) {

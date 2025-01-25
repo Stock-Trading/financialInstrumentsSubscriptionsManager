@@ -15,6 +15,8 @@ public interface DataLoaderRepository {
 
     Collection<DataLoaderModel> find5OldestAndActiveDataLoaders();
 
+    Collection<DataLoaderModel> find5OldestAndReadyForHandling();
+
     Collection<DataLoaderModel> find5InactiveDataLoaders(Duration timeFromLastConnectionAsHealthThreshold);
 
     Collection<DataLoaderModel> find5ActiveAndUnhandledDataLoaders(Duration timeFromLastConnectionAsHealthThreshold,
