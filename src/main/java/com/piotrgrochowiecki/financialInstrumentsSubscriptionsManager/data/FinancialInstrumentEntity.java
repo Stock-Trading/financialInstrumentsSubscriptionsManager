@@ -15,7 +15,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class FinancialInstrumentEntity {
+class FinancialInstrumentEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

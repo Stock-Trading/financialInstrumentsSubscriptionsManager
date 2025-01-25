@@ -15,7 +15,7 @@ import java.util.Collection;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class DataLoaderEntity {
+class DataLoaderEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,6 +39,6 @@ public class DataLoaderEntity {
     enum DataLoaderLoadStatus {
         TOO_HIGH,
         TOO_LOW,
-        BALANCED;
+        BALANCED
     }
 }
