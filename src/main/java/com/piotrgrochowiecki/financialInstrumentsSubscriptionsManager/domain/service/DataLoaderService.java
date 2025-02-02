@@ -25,6 +25,7 @@ public class DataLoaderService {
     private static final Integer RECOMMENDED_NUMBER_OF_FINANCIAL_INSTRUMENTS = 5;
     private static final Integer TIME_THRESHOLD_OF_HANDLING_READINESS_MILLS = 15_000;
 
+    private final DataLoaderService self;
     private final DataLoaderRepository dataLoaderRepository;
     private final TimeService timeService;
 
@@ -55,7 +56,7 @@ public class DataLoaderService {
         dataLoaderModel.setLastConnectedOn(timeService.getInstantUTC());
         dataLoaderModel.setActive(true);
         dataLoaderModel.setReadyForHandling(true);
-        return update(dataLoaderModel);
+        return self.update(dataLoaderModel);
     }
 
     /**
@@ -92,7 +93,7 @@ public class DataLoaderService {
         dataLoader.setLoadStatus(null);
         dataLoader.setActive(false);
         dataLoader.setReadyForHandling(false);
-        update(dataLoader);
+        self.update(dataLoader);
     }
 
     @Transactional
@@ -109,7 +110,7 @@ public class DataLoaderService {
                             " as Ready for Handling to false. Threshold of read for handling readiness is set to {} milliseconds",
                     dataLoader.getId(), dataLoader.getUuid(), dataLoader.getLastConnectedOn(), TIME_THRESHOLD_OF_HANDLING_READINESS_MILLS);
             dataLoader.setReadyForHandling(false);
-            update(dataLoader);
+            self.update(dataLoader);
         }
     }
 
@@ -135,7 +136,7 @@ public class DataLoaderService {
         log.debug("Data Loader with id {} has {} Financial Instruments assigned to it and its load status is {}." +
                         " Number of recommended financial instruments per data loader is {}.", dataLoader.getId(),
                 numberOfFIsAssigned, loadStatus, RECOMMENDED_NUMBER_OF_FINANCIAL_INSTRUMENTS);
-        update(dataLoader);
+        self.update(dataLoader);
     }
 
     @Transactional
@@ -154,7 +155,7 @@ public class DataLoaderService {
         for (DataLoaderModel dataLoader : dataLoadersWithLessFIsThanRecommended) {
             int numberOfFIs = dataLoader.getFinancialInstrumentModelCollection().size();
             int freeSpots = Math.subtractExact(RECOMMENDED_NUMBER_OF_FINANCIAL_INSTRUMENTS, numberOfFIs);
-            totalNumberOfFreeSpots = +freeSpots;
+            totalNumberOfFreeSpots += freeSpots;
         }
 
         List<FinancialInstrumentModel> fIsToBeReassigned = new ArrayList<>();
@@ -174,10 +175,6 @@ public class DataLoaderService {
             }
             dataLoader.setFinancialInstrumentModelCollection(fIsOfGivenDataLoader);
         }
-    }
-
-    public Collection<DataLoaderModel> getInactiveDataLoaders() {
-        return dataLoaderRepository.find5InactiveDataLoaders(Duration.ofSeconds(TIME_THRESHOLD_OF_HEALTH_MILLS));
     }
 
     public Collection<DataLoaderModel> getActiveDataLoaders() {
