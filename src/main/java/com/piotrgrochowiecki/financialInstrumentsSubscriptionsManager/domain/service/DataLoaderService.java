@@ -67,21 +67,34 @@ public class DataLoaderService {
     void checkActiveState() {
         log.debug("Running regular data loaders active state check");
         Collection<DataLoaderModel> dataLoaders = getActiveDataLoaders();
-        dataLoaders.forEach(dataLoader -> {
-            Instant lastInstantCountingAsHealthy = timeService.getInstantUTC()
-                    .minus(Duration.ofMillis(TIME_THRESHOLD_OF_HANDLING_READINESS_MILLS));
-            if (dataLoader.getLastConnectedOn().isBefore(lastInstantCountingAsHealthy)) {
-                log.debug("Data Loader id={}, uuid={} last connected on {}, which is before last instant counting" +
-                                " as healthy. Setting its loadStatus and Financial Instrument Collection to null and" +
-                                " Active to false. Threshold of healthy is set to {} milliseconds",
-                        dataLoader.getId(), dataLoader.getUuid(), dataLoader.getLastConnectedOn(), TIME_THRESHOLD_OF_HEALTH_MILLS);
-                dataLoader.setFinancialInstrumentModelCollection(null);
-                dataLoader.setLoadStatus(null);
-                dataLoader.setActive(false);
-                dataLoader.setReadyForHandling(false);
-                update(dataLoader);
-            }
-        });
+        dataLoaders.forEach(this::checkIfQualifiesAsInactiveAndUpdate);
+    }
+
+    private void checkIfQualifiesAsInactiveAndUpdate(DataLoaderModel dataLoader) {
+        Instant lastInstantCountingAsHealthy = timeService.getInstantUTC()
+                .minus(Duration.ofMillis(TIME_THRESHOLD_OF_HANDLING_READINESS_MILLS));
+        if (checkIfQualifiesAsUnhealthy(dataLoader, lastInstantCountingAsHealthy)) {
+            setConditionsOfUnhealthyAndUpdate(dataLoader);
+        }
+    }
+
+    private boolean checkIfQualifiesAsUnhealthy(DataLoaderModel dataLoader, Instant lastInstantCountingAsHealthy) {
+        if (dataLoader.getLastConnectedOn().isBefore(lastInstantCountingAsHealthy)) {
+            log.debug("Data Loader id={}, uuid={} last connected on {}, which is before last instant counting" +
+                            " as healthy. Setting its loadStatus and Financial Instrument Collection to null and" +
+                            " Active to false. Threshold of healthy is set to {} milliseconds",
+                    dataLoader.getId(), dataLoader.getUuid(), dataLoader.getLastConnectedOn(), TIME_THRESHOLD_OF_HEALTH_MILLS);
+            return true;
+        }
+        return false;
+    }
+
+    private void setConditionsOfUnhealthyAndUpdate(DataLoaderModel dataLoader) {
+        dataLoader.setFinancialInstrumentModelCollection(null);
+        dataLoader.setLoadStatus(null);
+        dataLoader.setActive(false);
+        dataLoader.setReadyForHandling(false);
+        update(dataLoader);
     }
 
     @Transactional
@@ -89,41 +102,46 @@ public class DataLoaderService {
     void checkReadyForHandlingStatus() {
         log.debug("Running regular data loaders readiness for handling check");
         Collection<DataLoaderModel> dataLoaders = getReadyForHandlingDataLoaders();
-        dataLoaders.forEach(dataLoader -> {
-            Instant lastInstantCountingAsReadyForHandling = timeService.getInstantUTC()
-                    .minus(Duration.ofMillis(TIME_THRESHOLD_OF_HANDLING_READINESS_MILLS));
-            if (dataLoader.getLastConnectedOn().isBefore(lastInstantCountingAsReadyForHandling)) {
-                log.debug("Data Loader id={}, uuid={} last connected on {}, which is before last instant counting" +
-                                " as Ready for Handling to false. Threshold of read for handling readiness is set to {} milliseconds",
-                        dataLoader.getId(), dataLoader.getUuid(), dataLoader.getLastConnectedOn(), TIME_THRESHOLD_OF_HANDLING_READINESS_MILLS);
-                dataLoader.setReadyForHandling(false);
-                update(dataLoader);
-            }
-        });
+        dataLoaders.forEach(this::checkReadyForHandlingStatusAndUpdate);
+    }
+
+    private void checkReadyForHandlingStatusAndUpdate(DataLoaderModel dataLoader) {
+        Instant lastInstantCountingAsReadyForHandling = timeService.getInstantUTC()
+                .minus(Duration.ofMillis(TIME_THRESHOLD_OF_HANDLING_READINESS_MILLS));
+        if (dataLoader.getLastConnectedOn().isBefore(lastInstantCountingAsReadyForHandling)) {
+            log.debug("Data Loader id={}, uuid={} last connected on {}, which is before last instant counting" +
+                            " as Ready for Handling to false. Threshold of read for handling readiness is set to {} milliseconds",
+                    dataLoader.getId(), dataLoader.getUuid(), dataLoader.getLastConnectedOn(), TIME_THRESHOLD_OF_HANDLING_READINESS_MILLS);
+            dataLoader.setReadyForHandling(false);
+            update(dataLoader);
+        }
     }
 
     //    @Scheduled(fixedDelay = 5000)
     @Transactional
     void checkLoadStatus() {
         log.debug("Running regular Data Loaders load status check");
-        List<DataLoaderModel> dataLoaderModelList = getActiveDataLoaders().stream().toList();
-        dataLoaderModelList.forEach(dataLoader -> {
-            int numberOfFIsAssigned = dataLoader.getFinancialInstrumentModelCollection().size();
-            DataLoaderModel.DataLoaderLoadStatus loadStatus;
-            if (numberOfFIsAssigned == RECOMMENDED_NUMBER_OF_FINANCIAL_INSTRUMENTS) {
-                loadStatus = DataLoaderModel.DataLoaderLoadStatus.BALANCED;
-            } else if (numberOfFIsAssigned < RECOMMENDED_NUMBER_OF_FINANCIAL_INSTRUMENTS) {
-                loadStatus = DataLoaderModel.DataLoaderLoadStatus.TOO_LOW;
-            } else {
-                loadStatus = DataLoaderModel.DataLoaderLoadStatus.TOO_HIGH;
-            }
-            dataLoader.setLoadStatus(loadStatus);
-            dataLoader.setLastHandledOn(timeService.getInstantUTC()); //updates time of handling, so other services retrieve records with "oldest" lastHandledOn field
-            log.debug("Data Loader with id {} has {} Financial Instruments assigned to it and its load status is {}." +
-                    " Number of recommended financial instruments per data loader is {}.", dataLoader.getId(),
-                    numberOfFIsAssigned, loadStatus, RECOMMENDED_NUMBER_OF_FINANCIAL_INSTRUMENTS);
-            update(dataLoader);
-        });
+        List<DataLoaderModel> dataLoaderModelList = getActiveDataLoaders().stream()
+                .toList();
+        dataLoaderModelList.forEach(this::checkAndUpdateLoadStatus);
+    }
+
+    private void checkAndUpdateLoadStatus(DataLoaderModel dataLoader) {
+        int numberOfFIsAssigned = dataLoader.getFinancialInstrumentModelCollection().size();
+        DataLoaderModel.DataLoaderLoadStatus loadStatus;
+        if (numberOfFIsAssigned == RECOMMENDED_NUMBER_OF_FINANCIAL_INSTRUMENTS) {
+            loadStatus = DataLoaderModel.DataLoaderLoadStatus.BALANCED;
+        } else if (numberOfFIsAssigned < RECOMMENDED_NUMBER_OF_FINANCIAL_INSTRUMENTS) {
+            loadStatus = DataLoaderModel.DataLoaderLoadStatus.TOO_LOW;
+        } else {
+            loadStatus = DataLoaderModel.DataLoaderLoadStatus.TOO_HIGH;
+        }
+        dataLoader.setLoadStatus(loadStatus);
+        dataLoader.setLastHandledOn(timeService.getInstantUTC()); //updates time of handling, so other services retrieve records with "oldest" lastHandledOn field
+        log.debug("Data Loader with id {} has {} Financial Instruments assigned to it and its load status is {}." +
+                        " Number of recommended financial instruments per data loader is {}.", dataLoader.getId(),
+                numberOfFIsAssigned, loadStatus, RECOMMENDED_NUMBER_OF_FINANCIAL_INSTRUMENTS);
+        update(dataLoader);
     }
 
     @Transactional
