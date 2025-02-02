@@ -1,5 +1,6 @@
 package com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.service;
 
+import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.exception.DataLoaderServiceException;
 import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.exception.ModelAlreadyExistsException;
 import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.model.DataLoaderModel;
 import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.model.FinancialInstrumentModel;
@@ -30,7 +31,7 @@ public class DataLoaderService {
     @Transactional
     public DataLoaderModel update(DataLoaderModel dataLoaderModel) {
         if (Objects.isNull(dataLoaderModel.getId())) {
-            throw new RuntimeException("Cannot update Data Loader as its id is null");
+            throw new DataLoaderServiceException("Cannot update Data Loader as its id is null");
         }
         return dataLoaderRepository.save(dataLoaderModel);
     }
