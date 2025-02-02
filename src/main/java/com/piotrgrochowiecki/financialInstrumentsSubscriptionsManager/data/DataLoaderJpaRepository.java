@@ -11,6 +11,10 @@ import java.util.Optional;
 interface DataLoaderJpaRepository extends JpaRepository<DataLoaderEntity, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @QueryHints(value = {
+            @QueryHint(name = "jakarta.persistence.lock.timeout", value = "-2")
+    })
+    //jakarta.persistence.lock.timeout=-2 sets up SELECT FOR UPDATE 
     Optional<DataLoaderEntity> findByUuid(String uuid);
 
     boolean existsByUuid(String uuid);
