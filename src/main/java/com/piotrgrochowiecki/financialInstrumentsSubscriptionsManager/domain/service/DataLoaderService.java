@@ -29,7 +29,7 @@ public class DataLoaderService {
     private final TimeService timeService;
 
     @Transactional
-    private DataLoaderModel update(DataLoaderModel dataLoaderModel) {
+    public DataLoaderModel update(DataLoaderModel dataLoaderModel) {
         if (Objects.isNull(dataLoaderModel.getId())) {
             throw new RuntimeException("Cannot update Data Loader as its id is null");
         }
