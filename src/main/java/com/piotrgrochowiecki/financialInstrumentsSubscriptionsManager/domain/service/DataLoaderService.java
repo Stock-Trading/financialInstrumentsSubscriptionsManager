@@ -6,7 +6,6 @@ import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.mod
 import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.ports.DataLoaderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,9 +13,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 
+@Log4j2
 @Service
 @RequiredArgsConstructor
-@Log4j2
 public class DataLoaderService {
 
     //    @Value("${dataloader.lastCheckInHealthThreshold.milisec}")
@@ -59,13 +58,11 @@ public class DataLoaderService {
     }
 
     /**
-     * Regular method that checks for last check-in time of DataLoader. If that time is longer then specified threshold,
+     * Checks for last check-in time of DataLoader. If that time is longer then specified threshold,
      * unassigns FinancialInstrument from it and sets its Active property to false.
      */
     @Transactional
-    @Scheduled(fixedDelay = 3000)
-    void checkActiveState() {
-        log.debug("Running regular data loaders active state check");
+    public void checkActiveState() {
         Collection<DataLoaderModel> dataLoaders = getActiveDataLoaders();
         dataLoaders.forEach(this::checkIfQualifiesAsInactiveAndUpdate);
     }
@@ -98,9 +95,7 @@ public class DataLoaderService {
     }
 
     @Transactional
-    @Scheduled(fixedDelay = 4000)
-    void checkReadyForHandlingStatus() {
-        log.debug("Running regular data loaders readiness for handling check");
+    public void checkReadyForHandlingStatus() {
         Collection<DataLoaderModel> dataLoaders = getReadyForHandlingDataLoaders();
         dataLoaders.forEach(this::checkReadyForHandlingStatusAndUpdate);
     }
@@ -117,10 +112,8 @@ public class DataLoaderService {
         }
     }
 
-    //    @Scheduled(fixedDelay = 5000)
     @Transactional
-    void checkLoadStatus() {
-        log.debug("Running regular Data Loaders load status check");
+    public void checkLoadStatus() {
         List<DataLoaderModel> dataLoaderModelList = getActiveDataLoaders().stream()
                 .toList();
         dataLoaderModelList.forEach(this::checkAndUpdateLoadStatus);
@@ -145,9 +138,7 @@ public class DataLoaderService {
     }
 
     @Transactional
-    @Scheduled(fixedDelay = 17_500)
-    void rebalanceDataLoaders() {
-        log.debug("Running regular task of re-balancing Financial Instruments assigned to Data Loaders");
+    public void balanceDataLoaders() {
         List<DataLoaderModel> allDataLoaders = getActiveAndUnhandledDataLoaders().stream().toList();
 
         List<DataLoaderModel> dataLoadersWithMoreFIsThanRecommended = allDataLoaders.stream()
@@ -165,22 +156,22 @@ public class DataLoaderService {
             totalNumberOfFreeSpots = +freeSpots;
         }
 
-        List<FinancialInstrumentModel> FIsToBeReassigned = new ArrayList<>();
-        while (FIsToBeReassigned.size() <= totalNumberOfFreeSpots) {
+        List<FinancialInstrumentModel> fIsToBeReassigned = new ArrayList<>();
+        while (fIsToBeReassigned.size() <= totalNumberOfFreeSpots) {
             for (DataLoaderModel dataLoader : dataLoadersWithMoreFIsThanRecommended) {
                 List<FinancialInstrumentModel> temporaryListOfFIs = dataLoader.getFinancialInstrumentModelCollection().stream().toList();
                 for (int i = RECOMMENDED_NUMBER_OF_FINANCIAL_INSTRUMENTS; i < temporaryListOfFIs.size() - 1; i++) {
-                    FIsToBeReassigned.add(temporaryListOfFIs.get(i));
+                    fIsToBeReassigned.add(temporaryListOfFIs.get(i));
                 }
             }
         }
 
         for (DataLoaderModel dataLoader : dataLoadersWithLessFIsThanRecommended) {
-            List<FinancialInstrumentModel> FIsOfGivenDataLoader = new ArrayList<>(dataLoader.getFinancialInstrumentModelCollection().stream().toList());
-            while (FIsOfGivenDataLoader.size() <= RECOMMENDED_NUMBER_OF_FINANCIAL_INSTRUMENTS) {
-                FIsOfGivenDataLoader.add(FIsToBeReassigned.getFirst());
+            List<FinancialInstrumentModel> fIsOfGivenDataLoader = new ArrayList<>(dataLoader.getFinancialInstrumentModelCollection().stream().toList());
+            while (fIsOfGivenDataLoader.size() <= RECOMMENDED_NUMBER_OF_FINANCIAL_INSTRUMENTS) {
+                fIsOfGivenDataLoader.add(fIsToBeReassigned.getFirst());
             }
-            dataLoader.setFinancialInstrumentModelCollection(FIsOfGivenDataLoader);
+            dataLoader.setFinancialInstrumentModelCollection(fIsOfGivenDataLoader);
         }
     }
 
