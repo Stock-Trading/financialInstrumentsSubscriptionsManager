@@ -20,14 +20,13 @@ import java.util.*;
 public class DataLoaderService {
 
     //    @Value("${dataloader.lastCheckInHealthThreshold.milisec}")
-    private final Integer TIME_THRESHOLD_OF_HEALTH_MILLS = 10_000;
+    private static final Integer TIME_THRESHOLD_OF_HEALTH_MILLS = 10_000;
     //    @Value("${dataloader.recommendedNumberOfFinancialInstruments}")
-    private final Integer RECOMMENDED_NUMBER_OF_FINANCIAL_INSTRUMENTS = 5;
+    private static final Integer RECOMMENDED_NUMBER_OF_FINANCIAL_INSTRUMENTS = 5;
+    private static final Integer TIME_THRESHOLD_OF_HANDLING_READINESS_MILLS = 15_000;
 
     private final DataLoaderRepository dataLoaderRepository;
     private final TimeService timeService;
-
-    private final Integer TIME_THRESHOLD_OF_HANDLING_READINESS_MILLS = 15_000;
 
     @Transactional
     private DataLoaderModel update(DataLoaderModel dataLoaderModel) {
