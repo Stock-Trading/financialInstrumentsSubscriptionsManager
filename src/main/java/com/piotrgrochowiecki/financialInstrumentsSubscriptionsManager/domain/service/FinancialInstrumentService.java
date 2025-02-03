@@ -1,11 +1,11 @@
 package com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.service;
 
+import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.exception.FinancialInstrumentServiceException;
 import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.model.DataLoaderModel;
 import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.model.FinancialInstrumentModel;
 import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.ports.FinancialInstrumentRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,21 +19,20 @@ import java.util.Objects;
 @Log4j2
 public class FinancialInstrumentService {
 
+    private final FinancialInstrumentService self;
     private final FinancialInstrumentRepository financialInstrumentRepository;
     private final DataLoaderService dataLoaderService;
 
     @Transactional
     public void update(FinancialInstrumentModel financialInstrumentModel) {
         if (Objects.isNull(financialInstrumentModel.getId())) {
-            throw new RuntimeException("Cannot update Financial Instrument as its id is null");
+            throw new FinancialInstrumentServiceException("Cannot update Financial Instrument as its id is null");
         }
         financialInstrumentRepository.save(financialInstrumentModel);
     }
 
-    @Scheduled(fixedDelay = 10_000)
     @Transactional
-    void assignUnassignedInstrumentsToActiveDataLoaders() {
-        log.debug("Starting regular task of assigning unassigned Financial Instruments to active Data Loaders");
+    public void assignUnassignedInstrumentsToActiveDataLoaders() {
         if (!areThereAnyFinancialInstrumentsUnassignedToAnyDataLoader()) {
             log.debug("All financial instruments are assigned to data loaders.");
             return;
@@ -57,7 +56,7 @@ public class FinancialInstrumentService {
             DataLoaderModel dataLoader = dataLoaderModelList.getFirst();
             financialInstrumentModelList.forEach(financialInstrumentModel -> {
                 financialInstrumentModel.setDataLoaderId(dataLoader.getId());
-                update(financialInstrumentModel);
+                self.update(financialInstrumentModel);
             });
             return;
         }
@@ -67,7 +66,7 @@ public class FinancialInstrumentService {
             financialInstrumentModel.setDataLoaderId(dataLoader.getId());
             log.debug("Assigned Data Loader with id {} to Financial Instrument {}",
                     dataLoader.getId(), financialInstrumentModel.getName());
-            update(financialInstrumentModel);
+            self.update(financialInstrumentModel);
             financialInstrumentModelList.removeFirst();
             indexOfDLforFIassignement++;
             if (indexOfDLforFIassignement == sizeOfDataLoaderList - 1) {
