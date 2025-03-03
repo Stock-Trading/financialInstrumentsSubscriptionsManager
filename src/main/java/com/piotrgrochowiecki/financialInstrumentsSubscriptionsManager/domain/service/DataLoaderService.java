@@ -19,15 +19,9 @@ import java.util.*;
 @RequiredArgsConstructor
 public class DataLoaderService {
 
-    //    @Value("${dataloader.lastCheckInHealthThreshold.milisec}")
-    private static final Integer TIME_THRESHOLD_OF_HEALTH_MILLS = 10_000;
-    //    @Value("${dataloader.recommendedNumberOfFinancialInstruments}")
-    private static final Integer RECOMMENDED_NUMBER_OF_FINANCIAL_INSTRUMENTS = 5;
-    private static final Integer TIME_THRESHOLD_OF_HANDLING_READINESS_MILLS = 15_000;
-
-    private final DataLoaderService self;
     private final DataLoaderRepository dataLoaderRepository;
     private final TimeService timeService;
+    private final ParametersProvider parametersProvider;
 
     @Transactional
     public DataLoaderModel update(DataLoaderModel dataLoaderModel) {
@@ -56,7 +50,7 @@ public class DataLoaderService {
         dataLoaderModel.setLastConnectedOn(timeService.getInstantUTC());
         dataLoaderModel.setActive(true);
         dataLoaderModel.setReadyForHandling(true);
-        return self.update(dataLoaderModel);
+        return update(dataLoaderModel);
     }
 
     /**
@@ -65,13 +59,16 @@ public class DataLoaderService {
      */
     @Transactional
     public void checkActiveState() {
-        Collection<DataLoaderModel> dataLoaders = getActiveDataLoaders();
+        Collection<DataLoaderModel> dataLoaders = dataLoaderRepository.findActiveDataLoaders(
+                DataLoaderRepository.OrderBy.LAST_CONNECTED_ON_ASC,
+                parametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader()
+        );
         dataLoaders.forEach(this::checkIfQualifiesAsInactiveAndUpdate);
     }
 
     private void checkIfQualifiesAsInactiveAndUpdate(DataLoaderModel dataLoader) {
         Instant lastInstantCountingAsHealthy = timeService.getInstantUTC()
-                .minus(Duration.ofMillis(TIME_THRESHOLD_OF_HANDLING_READINESS_MILLS));
+                .minus(Duration.ofMillis(parametersProvider.getTimeThresholdOfHandlingReadinessMilliseconds()));
         if (checkIfQualifiesAsUnhealthy(dataLoader, lastInstantCountingAsHealthy)) {
             setConditionsOfUnhealthyAndUpdate(dataLoader);
         }
@@ -82,7 +79,8 @@ public class DataLoaderService {
             log.debug("Data Loader id={}, uuid={} last connected on {}, which is before last instant counting" +
                             " as healthy. Setting its loadStatus and Financial Instrument Collection to null and" +
                             " Active to false. Threshold of healthy is set to {} milliseconds",
-                    dataLoader.getId(), dataLoader.getUuid(), dataLoader.getLastConnectedOn(), TIME_THRESHOLD_OF_HEALTH_MILLS);
+                    dataLoader.getId(), dataLoader.getUuid(), dataLoader.getLastConnectedOn(),
+                    parametersProvider.getTimeThresholdOfHandlingReadinessMilliseconds());
             return true;
         }
         return false;
@@ -93,7 +91,7 @@ public class DataLoaderService {
         dataLoader.setLoadStatus(null);
         dataLoader.setActive(false);
         dataLoader.setReadyForHandling(false);
-        self.update(dataLoader);
+        update(dataLoader);
     }
 
     @Transactional
@@ -104,19 +102,26 @@ public class DataLoaderService {
 
     private void checkReadyForHandlingStatusAndUpdate(DataLoaderModel dataLoader) {
         Instant lastInstantCountingAsReadyForHandling = timeService.getInstantUTC()
-                .minus(Duration.ofMillis(TIME_THRESHOLD_OF_HANDLING_READINESS_MILLS));
+                .minus(Duration.ofMillis(parametersProvider.getTimeThresholdOfHandlingReadinessMilliseconds()));
         if (dataLoader.getLastConnectedOn().isBefore(lastInstantCountingAsReadyForHandling)) {
             log.debug("Data Loader id={}, uuid={} last connected on {}, which is before last instant counting" +
-                            " as Ready for Handling to false. Threshold of read for handling readiness is set to {} milliseconds",
-                    dataLoader.getId(), dataLoader.getUuid(), dataLoader.getLastConnectedOn(), TIME_THRESHOLD_OF_HANDLING_READINESS_MILLS);
+                            " as Ready for Handling to false. Threshold of read for handling readiness is set to {}" +
+                            " milliseconds",
+                    dataLoader.getId(), dataLoader.getUuid(), dataLoader.getLastConnectedOn(),
+                    parametersProvider.getTimeThresholdOfHandlingReadinessMilliseconds());
             dataLoader.setReadyForHandling(false);
-            self.update(dataLoader);
+            update(dataLoader);
         }
     }
 
     @Transactional
     public void checkLoadStatus() {
-        List<DataLoaderModel> dataLoaderModelList = getActiveDataLoaders().stream()
+        List<DataLoaderModel> dataLoaderModelList = dataLoaderRepository
+                .findActiveDataLoaders(
+                        DataLoaderRepository.OrderBy.LAST_CONNECTED_ON_ASC,
+                        parametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader()
+                )
+                .stream()
                 .toList();
         dataLoaderModelList.forEach(this::checkAndUpdateLoadStatus);
     }
@@ -135,50 +140,61 @@ public class DataLoaderService {
         dataLoader.setLastHandledOn(timeService.getInstantUTC()); //updates time of handling, so other services retrieve records with "oldest" lastHandledOn field
         log.debug("Data Loader with id {} has {} Financial Instruments assigned to it and its load status is {}." +
                         " Number of recommended financial instruments per data loader is {}.", dataLoader.getId(),
-                numberOfFIsAssigned, loadStatus, RECOMMENDED_NUMBER_OF_FINANCIAL_INSTRUMENTS);
-        self.update(dataLoader);
+                numberOfFIsAssigned, loadStatus,
+                parametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader());
+        update(dataLoader);
     }
 
     @Transactional
     public void balanceDataLoaders() {
-        List<DataLoaderModel> allDataLoaders = getActiveAndUnhandledDataLoaders().stream().toList();
+        List<DataLoaderModel> allDataLoaders = getActiveAndUnhandledDataLoaders()
+                .stream()
+                .toList();
 
         List<DataLoaderModel> dataLoadersWithMoreFIsThanRecommended = allDataLoaders.stream()
-                .filter(dataLoaderModel -> dataLoaderModel.getFinancialInstrumentModelCollection().size() > RECOMMENDED_NUMBER_OF_FINANCIAL_INSTRUMENTS)
+                .filter(dataLoaderModel ->
+                        dataLoaderModel.getFinancialInstrumentModelCollection().size()
+                                > parametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader())
                 .toList();
 
         List<DataLoaderModel> dataLoadersWithLessFIsThanRecommended = allDataLoaders.stream()
-                .filter(dataLoaderModel -> dataLoaderModel.getFinancialInstrumentModelCollection().size() <= RECOMMENDED_NUMBER_OF_FINANCIAL_INSTRUMENTS)
+                .filter(dataLoaderModel ->
+                        dataLoaderModel.getFinancialInstrumentModelCollection().size()
+                                <= parametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader())
                 .toList();
 
         int totalNumberOfFreeSpots = 0;
         for (DataLoaderModel dataLoader : dataLoadersWithLessFIsThanRecommended) {
-            int numberOfFIs = dataLoader.getFinancialInstrumentModelCollection().size();
-            int freeSpots = Math.subtractExact(RECOMMENDED_NUMBER_OF_FINANCIAL_INSTRUMENTS, numberOfFIs);
+            int numberOfFIs = dataLoader.getFinancialInstrumentModelCollection()
+                    .size();
+            int freeSpots = Math.subtractExact(
+                    parametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader(),
+                    numberOfFIs
+            );
             totalNumberOfFreeSpots += freeSpots;
         }
 
         List<FinancialInstrumentModel> fIsToBeReassigned = new ArrayList<>();
         while (fIsToBeReassigned.size() <= totalNumberOfFreeSpots) {
             for (DataLoaderModel dataLoader : dataLoadersWithMoreFIsThanRecommended) {
-                List<FinancialInstrumentModel> temporaryListOfFIs = dataLoader.getFinancialInstrumentModelCollection().stream().toList();
-                for (int i = RECOMMENDED_NUMBER_OF_FINANCIAL_INSTRUMENTS; i < temporaryListOfFIs.size() - 1; i++) {
+                List<FinancialInstrumentModel> temporaryListOfFIs = dataLoader.getFinancialInstrumentModelCollection()
+                        .stream()
+                        .toList();
+                for (int i = parametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader(); i < temporaryListOfFIs.size() - 1; i++) {
                     fIsToBeReassigned.add(temporaryListOfFIs.get(i));
                 }
             }
         }
 
         for (DataLoaderModel dataLoader : dataLoadersWithLessFIsThanRecommended) {
-            List<FinancialInstrumentModel> fIsOfGivenDataLoader = new ArrayList<>(dataLoader.getFinancialInstrumentModelCollection().stream().toList());
-            while (fIsOfGivenDataLoader.size() <= RECOMMENDED_NUMBER_OF_FINANCIAL_INSTRUMENTS) {
+            List<FinancialInstrumentModel> fIsOfGivenDataLoader = new ArrayList<>(dataLoader.getFinancialInstrumentModelCollection()
+                    .stream()
+                    .toList());
+            while (fIsOfGivenDataLoader.size() <= parametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader()) {
                 fIsOfGivenDataLoader.add(fIsToBeReassigned.getFirst());
             }
             dataLoader.setFinancialInstrumentModelCollection(fIsOfGivenDataLoader);
         }
-    }
-
-    public Collection<DataLoaderModel> getActiveDataLoaders() {
-        return dataLoaderRepository.find5OldestAndActiveDataLoaders();
     }
 
     public Collection<DataLoaderModel> getReadyForHandlingDataLoaders() {
@@ -186,8 +202,10 @@ public class DataLoaderService {
     }
 
     public Collection<DataLoaderModel> getActiveAndUnhandledDataLoaders() {
-        return dataLoaderRepository.find5ActiveAndUnhandledDataLoaders(Duration.ofMillis(TIME_THRESHOLD_OF_HEALTH_MILLS),
-                Duration.ofMillis(TIME_THRESHOLD_OF_HANDLING_READINESS_MILLS));
+        return dataLoaderRepository.find5ActiveAndUnhandledDataLoaders(
+                Duration.ofMillis(parametersProvider.getTimeThresholdOfHandlingReadinessMilliseconds()),
+                Duration.ofMillis(parametersProvider.getTimeThresholdOfHandlingReadinessMilliseconds())
+        );
     }
 
     public DataLoaderModel getByUuid(String dataLoaderUuid) {
