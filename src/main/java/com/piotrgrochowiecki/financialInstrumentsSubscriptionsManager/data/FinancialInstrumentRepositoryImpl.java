@@ -11,7 +11,7 @@ import java.util.Collection;
 @Repository
 @AllArgsConstructor
 @Log4j2
-public class FinancialInstrumentRepositoryImpl implements FinancialInstrumentRepository {
+class FinancialInstrumentRepositoryImpl implements FinancialInstrumentRepository {
 
     private final FinancialInstrumentJpaRepository jpaRepository;
     private final FinancialInstrumentEntityMapper mapper;
