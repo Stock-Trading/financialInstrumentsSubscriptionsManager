@@ -48,12 +48,6 @@ interface DataLoaderJpaRepository extends JpaRepository<DataLoaderEntity, Long> 
     @QueryHints(value = {
             @QueryHint(name = "jakarta.persistence.lock.timeout", value = "-2")
     })
-    List<DataLoaderEntity> findTop5ByLastConnectedOnLessThan(Instant instant);
-
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @QueryHints(value = {
-            @QueryHint(name = "jakarta.persistence.lock.timeout", value = "-2")
-    })
     List<DataLoaderEntity> findTop5ByLastConnectedOnGreaterThanAndLastHandledOnLessThanEqual(Instant lastConnectedOn,
                                                                                              Instant firstHandledOn);
 

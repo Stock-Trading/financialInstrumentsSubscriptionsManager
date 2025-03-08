@@ -22,8 +22,6 @@ public interface DataLoaderRepository {
 
     Collection<DataLoaderModel> findReadyForHandling(OrderBy orderBy, Integer limit);
 
-    Collection<DataLoaderModel> find5InactiveDataLoaders(Duration timeFromLastConnectionAsHealthThreshold);
-
     Collection<DataLoaderModel> find5ActiveAndUnhandledDataLoaders(Duration timeFromLastConnectionAsHealthThreshold,
                                                                    Duration timeFromLastHandledTimeAsUnhandledThreshold);
 
