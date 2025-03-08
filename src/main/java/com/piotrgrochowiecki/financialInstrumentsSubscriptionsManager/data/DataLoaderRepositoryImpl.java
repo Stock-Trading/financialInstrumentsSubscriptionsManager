@@ -37,10 +37,9 @@ public class DataLoaderRepositoryImpl implements DataLoaderRepository {
     @Override
     public DataLoaderModel findByUuid(String dataLoaderUUID) {
         Optional<DataLoaderEntity> dataLoaderEntityOptional = jpaRepository.findByUuid(dataLoaderUUID);
-        if (dataLoaderEntityOptional.isPresent()) {
-            return mapper.mapToDataLoaderModel(dataLoaderEntityOptional.get());
-        }
-        throw new EntityNotFoundException("No DataLoaderEntity found with uuid " + dataLoaderUUID);
+        return mapper.mapToDataLoaderModel(dataLoaderEntityOptional.orElseThrow(
+                () -> new EntityNotFoundException("No DataLoaderEntity found with uuid " + dataLoaderUUID))
+        );
     }
 
     @Override
