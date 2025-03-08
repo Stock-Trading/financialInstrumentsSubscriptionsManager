@@ -96,19 +96,32 @@ public class DataLoaderService {
 
     @Transactional
     public void checkReadyForHandlingStatus() {
-        Collection<DataLoaderModel> dataLoaders = getReadyForHandlingDataLoaders();
+        Collection<DataLoaderModel> dataLoaders = dataLoaderRepository.findReadyForHandling(
+                DataLoaderRepository.OrderBy.LAST_CONNECTED_ON_ASC,
+                parametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader()
+        );
         dataLoaders.forEach(this::checkReadyForHandlingStatusAndUpdate);
     }
 
     private void checkReadyForHandlingStatusAndUpdate(DataLoaderModel dataLoader) {
         Instant lastInstantCountingAsReadyForHandling = timeService.getInstantUTC()
-                .minus(Duration.ofMillis(parametersProvider.getTimeThresholdOfHandlingReadinessMilliseconds()));
-        if (dataLoader.getLastConnectedOn().isBefore(lastInstantCountingAsReadyForHandling)) {
-            log.debug("Data Loader id={}, uuid={} last connected on {}, which is before last instant counting" +
-                            " as Ready for Handling to false. Threshold of read for handling readiness is set to {}" +
-                            " milliseconds",
-                    dataLoader.getId(), dataLoader.getUuid(), dataLoader.getLastConnectedOn(),
-                    parametersProvider.getTimeThresholdOfHandlingReadinessMilliseconds());
+                .minus(
+                        Duration.ofMillis(
+                                parametersProvider.getTimeThresholdOfHandlingReadinessMilliseconds()
+                        )
+                );
+        if (dataLoader.getLastConnectedOn()
+                .isBefore(lastInstantCountingAsReadyForHandling)) {
+            log.info("""
+                            Data Loader id={}, uuid={} last connected on {}, which is before last point in time
+                            counting as Ready for Handling. Setting its readyForHandling field to FALSE.
+                            Threshold of ready for handling is set to {} milliseconds
+                            """,
+                    dataLoader.getId(),
+                    dataLoader.getUuid(),
+                    dataLoader.getLastConnectedOn(),
+                    parametersProvider.getTimeThresholdOfHandlingReadinessMilliseconds()
+            );
             dataLoader.setReadyForHandling(false);
             update(dataLoader);
         }
@@ -116,11 +129,9 @@ public class DataLoaderService {
 
     @Transactional
     public void checkLoadStatus() {
-        List<DataLoaderModel> dataLoaderModelList = dataLoaderRepository
-                .findActiveDataLoaders(
+        List<DataLoaderModel> dataLoaderModelList = dataLoaderRepository.findActiveDataLoaders(
                         DataLoaderRepository.OrderBy.LAST_CONNECTED_ON_ASC,
-                        parametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader()
-                )
+                        parametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader())
                 .stream()
                 .toList();
         dataLoaderModelList.forEach(this::checkAndUpdateLoadStatus);
@@ -195,10 +206,6 @@ public class DataLoaderService {
             }
             dataLoader.setFinancialInstrumentModelCollection(fIsOfGivenDataLoader);
         }
-    }
-
-    public Collection<DataLoaderModel> getReadyForHandlingDataLoaders() {
-        return dataLoaderRepository.find5OldestAndReadyForHandling();
     }
 
     public Collection<DataLoaderModel> getActiveAndUnhandledDataLoaders() {

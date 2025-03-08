@@ -20,7 +20,7 @@ public interface DataLoaderRepository {
 
     Collection<DataLoaderModel> findActiveDataLoaders(OrderBy orderBy, Integer limit);
 
-    Collection<DataLoaderModel> find5OldestAndReadyForHandling();
+    Collection<DataLoaderModel> findReadyForHandling(OrderBy orderBy, Integer limit);
 
     Collection<DataLoaderModel> find5InactiveDataLoaders(Duration timeFromLastConnectionAsHealthThreshold);
 

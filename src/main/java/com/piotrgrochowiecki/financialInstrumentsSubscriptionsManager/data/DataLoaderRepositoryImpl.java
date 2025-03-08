@@ -52,8 +52,11 @@ public class DataLoaderRepositoryImpl implements DataLoaderRepository {
                 .toList();
     }
 
-    public Collection<DataLoaderModel> find5OldestAndReadyForHandling() {
-        return jpaRepository.findTop5ByReadyForHandlingTrueOrderByLastConnectedOnAsc().stream()
+    public Collection<DataLoaderModel> findReadyForHandling(OrderBy orderBy, Integer limit) {
+        Sort sort = mapper.mapToSort(orderBy);
+        Pageable pageable = PageRequest.of(0, limit, sort);
+        return jpaRepository.findReadyForHandling(pageable)
+                .stream()
                 .map(mapper::mapToDataLoaderModel)
                 .toList();
     }

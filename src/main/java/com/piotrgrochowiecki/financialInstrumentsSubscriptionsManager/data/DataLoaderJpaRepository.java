@@ -34,9 +34,15 @@ interface DataLoaderJpaRepository extends JpaRepository<DataLoaderEntity, Long> 
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @QueryHints(value = {
-            @QueryHint(name = "jakarta.persistence.lock.timeout", value = "-2")
+            @QueryHint(name = "jakarta.persistence.lock.timeout",
+                    value = "-2")
     })
-    List<DataLoaderEntity> findTop5ByReadyForHandlingTrueOrderByLastConnectedOnAsc();
+    @Query(value = """
+            SELECT dl
+            FROM DataLoaderEntity dl
+            WHERE dl.readyForHandling = true
+            """)
+    List<DataLoaderEntity> findReadyForHandling(Pageable pageable);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @QueryHints(value = {
