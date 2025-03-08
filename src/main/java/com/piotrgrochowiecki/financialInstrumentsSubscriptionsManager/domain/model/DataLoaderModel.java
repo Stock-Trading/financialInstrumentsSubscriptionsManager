@@ -1,11 +1,9 @@
 package com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.model;
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Collection;
 
 @Builder
@@ -20,12 +18,27 @@ public class DataLoaderModel {
     private Instant lastHandledOn;
     private Boolean active;
     private Boolean readyForHandling;
-    private DataLoaderLoadStatus loadStatus;
+    private Status loadStatus;
     private Collection<FinancialInstrumentModel> financialInstrumentModelCollection;
 
-    public enum DataLoaderLoadStatus {
-        TOO_HIGH,
-        TOO_LOW,
-        BALANCED
+    @Getter
+    @RequiredArgsConstructor
+    public enum Status {
+        TOO_HIGH("too_high"),
+        TOO_LOW("too_low"),
+        BALANCED("balanced");
+
+        private final String dbValue;
+
+        public static Status getStatusByDbValue(String dbValue) {
+            return Arrays.stream(Status.values())
+                    .filter(it -> it.dbValue
+                            .equals(dbValue))
+                    .findFirst()
+                    .orElseThrow(
+                            () -> new IllegalArgumentException("Unknown dbValue")
+                    );
+        }
     }
+
 }

@@ -31,16 +31,9 @@ class DataLoaderEntity {
     @Column(name = "ready_for_handling", nullable = false)
     Boolean readyForHandling;
     @Column(name = "load_status")
-    @Enumerated(EnumType.STRING)
-    DataLoaderLoadStatus loadStatus;
+    String loadStatus;
     @OneToMany(cascade = CascadeType.ALL,
             fetch = FetchType.LAZY,
             mappedBy = "dataLoader")
     Collection<FinancialInstrumentEntity> financialInstrument;
-
-    enum DataLoaderLoadStatus {
-        TOO_HIGH,
-        TOO_LOW,
-        BALANCED
-    }
 }

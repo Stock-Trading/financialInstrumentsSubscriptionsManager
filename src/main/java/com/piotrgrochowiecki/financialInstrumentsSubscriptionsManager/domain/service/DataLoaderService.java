@@ -128,13 +128,13 @@ public class DataLoaderService {
 
     private void checkAndUpdateLoadStatus(DataLoaderModel dataLoader) {
         int numberOfFIsAssigned = dataLoader.getFinancialInstrumentModelCollection().size();
-        DataLoaderModel.DataLoaderLoadStatus loadStatus;
-        if (numberOfFIsAssigned == RECOMMENDED_NUMBER_OF_FINANCIAL_INSTRUMENTS) {
-            loadStatus = DataLoaderModel.DataLoaderLoadStatus.BALANCED;
-        } else if (numberOfFIsAssigned < RECOMMENDED_NUMBER_OF_FINANCIAL_INSTRUMENTS) {
-            loadStatus = DataLoaderModel.DataLoaderLoadStatus.TOO_LOW;
+        DataLoaderModel.Status loadStatus;
+        if (numberOfFIsAssigned == parametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader()) {
+            loadStatus = DataLoaderModel.Status.BALANCED;
+        } else if (numberOfFIsAssigned < parametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader()) {
+            loadStatus = DataLoaderModel.Status.TOO_LOW;
         } else {
-            loadStatus = DataLoaderModel.DataLoaderLoadStatus.TOO_HIGH;
+            loadStatus = DataLoaderModel.Status.TOO_HIGH;
         }
         dataLoader.setLoadStatus(loadStatus);
         dataLoader.setLastHandledOn(timeService.getInstantUTC()); //updates time of handling, so other services retrieve records with "oldest" lastHandledOn field

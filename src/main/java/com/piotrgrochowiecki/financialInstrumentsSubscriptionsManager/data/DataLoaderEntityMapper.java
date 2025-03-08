@@ -20,19 +20,18 @@ class DataLoaderEntityMapper {
                 .lastConnectedOn(entity.getLastConnectedOn())
                 .lastHandledOn(entity.getLastHandledOn())
                 .readyForHandling(entity.getReadyForHandling())
+                .loadStatus(
+                        DataLoaderModel.Status
+                                .getStatusByDbValue(
+                                        entity.getLoadStatus()
+                                )
+                )
                 .active(entity.getActive())
                 .build();
 
-        DataLoaderEntity.DataLoaderLoadStatus entityLoadStatus = entity.getLoadStatus();
-        if (!Objects.isNull(entityLoadStatus)) {
-            switch (entityLoadStatus) {
-                case TOO_LOW -> model.setLoadStatus(DataLoaderModel.DataLoaderLoadStatus.TOO_LOW);
-                case TOO_HIGH -> model.setLoadStatus(DataLoaderModel.DataLoaderLoadStatus.TOO_HIGH);
-                case BALANCED -> model.setLoadStatus(DataLoaderModel.DataLoaderLoadStatus.BALANCED);
-            }
-        }
         if (!Objects.isNull(entity.getFinancialInstrument())) {
-            model.setFinancialInstrumentModelCollection(entity.getFinancialInstrument().stream()
+            model.setFinancialInstrumentModelCollection(entity.getFinancialInstrument()
+                    .stream()
                     .map(financialInstrumentEntityMapper::mapToFinancialInstrumentModel)
                     .collect(Collectors.toList())
             );
@@ -41,14 +40,17 @@ class DataLoaderEntityMapper {
     }
 
     DataLoaderEntity mapToDataLoaderEntity(DataLoaderModel model) {
-        DataLoaderEntity entity = DataLoaderEntity.builder()
+        return DataLoaderEntity.builder()
                 .id(model.getId())
                 .uuid(model.getUuid())
                 .lastConnectedOn(model.getLastConnectedOn())
                 .lastHandledOn(model.getLastHandledOn())
                 .active(model.getActive())
                 .readyForHandling(model.getReadyForHandling())
+                .loadStatus(model.getLoadStatus()
+                        .getDbValue())
                 .build();
+    }
 
         DataLoaderModel.DataLoaderLoadStatus modelLoadStatus = model.getLoadStatus();
         if (!Objects.isNull(model.getLoadStatus())) {
