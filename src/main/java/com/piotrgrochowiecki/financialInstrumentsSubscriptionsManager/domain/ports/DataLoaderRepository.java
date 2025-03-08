@@ -22,8 +22,10 @@ public interface DataLoaderRepository {
 
     Collection<DataLoaderModel> findReadyForHandling(OrderBy orderBy, Integer limit);
 
-    Collection<DataLoaderModel> find5ActiveAndUnhandledDataLoaders(Duration timeFromLastConnectionAsHealthThreshold,
-                                                                   Duration timeFromLastHandledTimeAsUnhandledThreshold);
+    Collection<DataLoaderModel> findActiveAndUnhandledDataLoaders(Duration timeFromLastConnectionAsHealthThreshold,
+                                                                  Duration timeFromLastHandledTimeAsUnhandledThreshold,
+                                                                  OrderBy orderBy,
+                                                                  Integer limit);
 
     boolean existsByUuid(String dataLoaderUUID);
 }

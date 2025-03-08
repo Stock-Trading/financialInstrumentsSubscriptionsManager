@@ -62,10 +62,20 @@ public class DataLoaderRepositoryImpl implements DataLoaderRepository {
     }
 
     @Override
-    public Collection<DataLoaderModel> find5ActiveAndUnhandledDataLoaders(Duration timeFromLastConnectionAsHealthThreshold, Duration timeFromLastHandledTimeAsUnhandledThreshold) {
-        Instant lastInstantCountingAsHealthy = timeService.getInstantUTC().minus(timeFromLastConnectionAsHealthThreshold);
-        Instant firstInstantCountingAsUnhandled = timeService.getInstantUTC().minus(timeFromLastHandledTimeAsUnhandledThreshold);
-        return jpaRepository.findTop5ByLastConnectedOnGreaterThanAndLastHandledOnLessThanEqual(lastInstantCountingAsHealthy, firstInstantCountingAsUnhandled).stream()
+    public Collection<DataLoaderModel> findActiveAndUnhandledDataLoaders(Duration timeFromLastConnectionAsHealthThreshold,
+                                                                         Duration timeFromLastHandledTimeAsUnhandledThreshold,
+                                                                         OrderBy orderBy,
+                                                                         Integer limit) {
+        Instant lastInstantCountingAsHealthy = timeService.getInstantUTC()
+                .minus(timeFromLastConnectionAsHealthThreshold);
+        Instant firstInstantCountingAsUnhandled = timeService.getInstantUTC()
+                .minus(timeFromLastHandledTimeAsUnhandledThreshold);
+        Sort sort = mapper.mapToSort(orderBy);
+        Pageable pageable = PageRequest.of(0, limit, sort);
+        return jpaRepository.findByLastConnectedOnGreaterThanAndLastHandledOnLessThanEqual(lastInstantCountingAsHealthy,
+                        firstInstantCountingAsUnhandled,
+                        pageable)
+                .stream()
                 .map(mapper::mapToDataLoaderModel)
                 .toList();
     }

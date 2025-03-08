@@ -68,19 +68,28 @@ public class DataLoaderService {
 
     private void checkIfQualifiesAsInactiveAndUpdate(DataLoaderModel dataLoader) {
         Instant lastInstantCountingAsHealthy = timeService.getInstantUTC()
-                .minus(Duration.ofMillis(parametersProvider.getTimeThresholdOfHandlingReadinessMilliseconds()));
+                .minus(Duration.ofMillis(
+                                parametersProvider.getTimeThresholdOfHandlingReadinessMilliseconds()
+                        )
+                );
         if (checkIfQualifiesAsUnhealthy(dataLoader, lastInstantCountingAsHealthy)) {
             setConditionsOfUnhealthyAndUpdate(dataLoader);
         }
     }
 
     private boolean checkIfQualifiesAsUnhealthy(DataLoaderModel dataLoader, Instant lastInstantCountingAsHealthy) {
-        if (dataLoader.getLastConnectedOn().isBefore(lastInstantCountingAsHealthy)) {
-            log.debug("Data Loader id={}, uuid={} last connected on {}, which is before last instant counting" +
-                            " as healthy. Setting its loadStatus and Financial Instrument Collection to null and" +
-                            " Active to false. Threshold of healthy is set to {} milliseconds",
-                    dataLoader.getId(), dataLoader.getUuid(), dataLoader.getLastConnectedOn(),
-                    parametersProvider.getTimeThresholdOfHandlingReadinessMilliseconds());
+        if (dataLoader.getLastConnectedOn()
+                .isBefore(lastInstantCountingAsHealthy)) {
+            log.info("""
+                            Data Loader id={}, uuid={} last connected on {}, which is before last point in time counting
+                            as healthy. Setting its loadStatus and Financial Instrument Collection to null and
+                            Active to false. Threshold of healthy is set to {} milliseconds.
+                            """,
+                    dataLoader.getId(),
+                    dataLoader.getUuid(),
+                    dataLoader.getLastConnectedOn(),
+                    parametersProvider.getTimeThresholdOfHandlingReadinessMilliseconds()
+            );
             return true;
         }
         return false;
@@ -94,6 +103,9 @@ public class DataLoaderService {
         update(dataLoader);
     }
 
+    /**
+     *
+     */
     @Transactional
     public void checkReadyForHandlingStatus() {
         Collection<DataLoaderModel> dataLoaders = dataLoaderRepository.findReadyForHandling(
@@ -131,7 +143,8 @@ public class DataLoaderService {
     public void checkLoadStatus() {
         List<DataLoaderModel> dataLoaderModelList = dataLoaderRepository.findActiveDataLoaders(
                         DataLoaderRepository.OrderBy.LAST_CONNECTED_ON_ASC,
-                        parametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader())
+                        parametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader()
+                )
                 .stream()
                 .toList();
         dataLoaderModelList.forEach(this::checkAndUpdateLoadStatus);
@@ -149,29 +162,42 @@ public class DataLoaderService {
         }
         dataLoader.setLoadStatus(loadStatus);
         dataLoader.setLastHandledOn(timeService.getInstantUTC()); //updates time of handling, so other services retrieve records with "oldest" lastHandledOn field
-        log.debug("Data Loader with id {} has {} Financial Instruments assigned to it and its load status is {}." +
-                        " Number of recommended financial instruments per data loader is {}.", dataLoader.getId(),
-                numberOfFIsAssigned, loadStatus,
+        log.debug("""
+                        Data Loader with id {} has {} Financial Instruments assigned to it and its load status is {}.
+                        Number of recommended financial instruments per data loader is {}.
+                        """,
+                dataLoader.getId(),
+                numberOfFIsAssigned,
+                loadStatus,
                 parametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader());
         update(dataLoader);
     }
 
     @Transactional
     public void balanceDataLoaders() {
-        List<DataLoaderModel> allDataLoaders = getActiveAndUnhandledDataLoaders()
+        List<DataLoaderModel> allDataLoaders = dataLoaderRepository.findActiveAndUnhandledDataLoaders(
+                        Duration.ofMillis(parametersProvider.getTimeThresholdOfHandlingReadinessMilliseconds()),
+                        Duration.ofMillis(parametersProvider.getTimeThresholdOfHandlingReadinessMilliseconds()),
+                        DataLoaderRepository.OrderBy.LAST_CONNECTED_ON_ASC,
+                        parametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader()
+                )
                 .stream()
                 .toList();
 
         List<DataLoaderModel> dataLoadersWithMoreFIsThanRecommended = allDataLoaders.stream()
                 .filter(dataLoaderModel ->
-                        dataLoaderModel.getFinancialInstrumentModelCollection().size()
-                                > parametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader())
+                        dataLoaderModel.getFinancialInstrumentModelCollection()
+                                .size()
+                                > parametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader()
+                )
                 .toList();
 
         List<DataLoaderModel> dataLoadersWithLessFIsThanRecommended = allDataLoaders.stream()
                 .filter(dataLoaderModel ->
-                        dataLoaderModel.getFinancialInstrumentModelCollection().size()
-                                <= parametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader())
+                        dataLoaderModel.getFinancialInstrumentModelCollection()
+                                .size()
+                                <= parametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader()
+                )
                 .toList();
 
         int totalNumberOfFreeSpots = 0;
@@ -206,13 +232,6 @@ public class DataLoaderService {
             }
             dataLoader.setFinancialInstrumentModelCollection(fIsOfGivenDataLoader);
         }
-    }
-
-    public Collection<DataLoaderModel> getActiveAndUnhandledDataLoaders() {
-        return dataLoaderRepository.find5ActiveAndUnhandledDataLoaders(
-                Duration.ofMillis(parametersProvider.getTimeThresholdOfHandlingReadinessMilliseconds()),
-                Duration.ofMillis(parametersProvider.getTimeThresholdOfHandlingReadinessMilliseconds())
-        );
     }
 
     public DataLoaderModel getByUuid(String dataLoaderUuid) {

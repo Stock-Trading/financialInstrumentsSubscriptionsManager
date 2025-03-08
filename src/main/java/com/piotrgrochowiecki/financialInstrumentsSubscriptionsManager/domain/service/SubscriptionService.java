@@ -20,7 +20,9 @@ public class SubscriptionService {
 
     public SubscriptionModel subscribe(String dataLoaderUUID) {
         DataLoaderModel dataLoaderModelOptional = dataLoaderService.getByUuid(dataLoaderUUID);
-        List<FinancialInstrumentModel> financialInstrumentModelList = dataLoaderModelOptional.getFinancialInstrumentModelCollection().stream().toList();
+        List<FinancialInstrumentModel> financialInstrumentModelList = dataLoaderModelOptional.getFinancialInstrumentModelCollection()
+                .stream()
+                .toList();
         return SubscriptionModel.builder()
                 .dataLoaderUUID(dataLoaderModelOptional.getUuid())
                 .financialInstrumentModelCollection(financialInstrumentModelList)
