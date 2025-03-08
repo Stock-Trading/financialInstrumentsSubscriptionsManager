@@ -2,6 +2,7 @@ package com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.data;
 
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.QueryHint;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
 
 import java.time.Instant;
