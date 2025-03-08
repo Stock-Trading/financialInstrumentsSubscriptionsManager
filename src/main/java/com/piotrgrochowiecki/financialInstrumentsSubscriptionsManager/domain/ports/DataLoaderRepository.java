@@ -9,11 +9,16 @@ import java.util.Collection;
 @Repository
 public interface DataLoaderRepository {
 
+    enum OrderBy {
+        LAST_CONNECTED_ON_DES,
+        LAST_CONNECTED_ON_ASC
+    }
+
     DataLoaderModel save(DataLoaderModel dataLoaderModel);
 
     DataLoaderModel findByUuid(String dataLoaderUUID);
 
-    Collection<DataLoaderModel> find5OldestAndActiveDataLoaders();
+    Collection<DataLoaderModel> findActiveDataLoaders(OrderBy orderBy, Integer limit);
 
     Collection<DataLoaderModel> find5OldestAndReadyForHandling();
 

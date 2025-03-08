@@ -1,7 +1,9 @@
 package com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.data;
 
 import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.model.DataLoaderModel;
+import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.ports.DataLoaderRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
@@ -52,15 +54,19 @@ class DataLoaderEntityMapper {
                 .build();
     }
 
-        DataLoaderModel.DataLoaderLoadStatus modelLoadStatus = model.getLoadStatus();
-        if (!Objects.isNull(model.getLoadStatus())) {
-            switch (modelLoadStatus) {
-                case TOO_LOW -> entity.setLoadStatus(DataLoaderEntity.DataLoaderLoadStatus.TOO_LOW);
-                case TOO_HIGH -> entity.setLoadStatus(DataLoaderEntity.DataLoaderLoadStatus.TOO_HIGH);
-                case BALANCED -> entity.setLoadStatus(DataLoaderEntity.DataLoaderLoadStatus.BALANCED);
+    Sort mapToSort(DataLoaderRepository.OrderBy orderBy) {
+        switch (orderBy) {
+            case DataLoaderRepository.OrderBy.LAST_CONNECTED_ON_ASC -> {
+                return Sort.sort(DataLoaderEntity.class)
+                        .by(DataLoaderEntity::getLastConnectedOn)
+                        .ascending();
             }
+            case DataLoaderRepository.OrderBy.LAST_CONNECTED_ON_DES -> {
+                return Sort.sort(DataLoaderEntity.class)
+                        .by(DataLoaderEntity::getLastConnectedOn)
+                        .descending();
+            }
+            default -> throw new IllegalArgumentException("Unknown enum " + orderBy.name());
         }
-        return entity;
     }
-
 }

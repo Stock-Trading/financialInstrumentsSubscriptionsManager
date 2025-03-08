@@ -5,6 +5,9 @@ import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.por
 import com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.domain.service.TimeService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,8 +44,11 @@ public class DataLoaderRepositoryImpl implements DataLoaderRepository {
     }
 
     @Override
-    public List<DataLoaderModel> find5OldestAndActiveDataLoaders() {
-        return jpaRepository.findTop5ByActiveTrueOrderByLastConnectedOnAsc().stream()
+    public List<DataLoaderModel> findActiveDataLoaders(OrderBy orderBy, Integer limit) {
+        Sort sort = mapper.mapToSort(orderBy);
+        Pageable pageable = PageRequest.of(0, limit, sort);
+        return jpaRepository.findAllActive(pageable)
+                .stream()
                 .map(mapper::mapToDataLoaderModel)
                 .toList();
     }

@@ -3,7 +3,6 @@ package com.piotrgrochowiecki.financialInstrumentsSubscriptionsManager.data;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
 import java.time.Instant;
 import java.util.Collection;
 
