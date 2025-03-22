@@ -1,0 +1,368 @@
+{
+	"info": {
+		"_postman_id": "c34927d9-e694-4660-8e04-c9197947f338",
+		"name": "Stock Trading - Subscriptions Manager",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26489334"
+	},
+	"item": [
+		{
+			"name": "CheckIn with uuid2",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/internal/dataLoader/uuid1/last-connection-time",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"internal",
+						"dataLoader",
+						"uuid1",
+						"last-connection-time"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CheckIn with uuid3",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/internal/dataLoader/uuid3/last-connection-time",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"internal",
+						"dataLoader",
+						"uuid3",
+						"last-connection-time"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CheckIn with uuid4",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/internal/dataLoader/uuid4/last-connection-time",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"internal",
+						"dataLoader",
+						"uuid4",
+						"last-connection-time"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Register uuid1 data loader",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/internal/dataLoader/uuid1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"internal",
+						"dataLoader",
+						"uuid1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Register uuid2 data loader",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/internal/dataLoader/uuid2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"internal",
+						"dataLoader",
+						"uuid2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Register uuid3 data loader",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/internal/dataLoader/uuid3",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"internal",
+						"dataLoader",
+						"uuid3"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Register uuid4 data loader",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/internal/dataLoader/uuid4",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"internal",
+						"dataLoader",
+						"uuid4"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Register uuid5 data loader",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/internal/dataLoader/uuid5",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"internal",
+						"dataLoader",
+						"uuid5"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Register uuid6 data loader",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/internal/dataLoader/uuid6",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"internal",
+						"dataLoader",
+						"uuid6"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Register uuid7 data loader",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/internal/dataLoader/uuid7",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"internal",
+						"dataLoader",
+						"uuid7"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Subscribtion for uuid1",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/internal/subscription/uuid1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"internal",
+						"subscription",
+						"uuid1"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
