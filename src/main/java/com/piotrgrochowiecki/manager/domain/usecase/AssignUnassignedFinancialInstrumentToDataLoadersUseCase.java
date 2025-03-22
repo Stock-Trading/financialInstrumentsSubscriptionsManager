@@ -1,5 +1,6 @@
 package com.piotrgrochowiecki.manager.domain.usecase;
 
+import com.piotrgrochowiecki.manager.domain.component.FinancialInstrumentParametersProvider;
 import com.piotrgrochowiecki.manager.domain.model.DataLoaderModel;
 import com.piotrgrochowiecki.manager.domain.model.FinancialInstrumentModel;
 import com.piotrgrochowiecki.manager.domain.ports.DataLoaderRepository;
@@ -11,7 +12,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -24,14 +24,20 @@ public class AssignUnassignedFinancialInstrumentToDataLoadersUseCase {
     private final DataLoaderRepository dataLoaderRepository;
     private final FinancialInstrumentRepository financialInstrumentRepository;
     private final DataLoaderParametersProvider dataLoaderParametersProvider;
+    private final FinancialInstrumentParametersProvider financialInstrumentParametersProvider;
 
     @Transactional
     public void assignUnassignedInstrumentsToActiveDataLoaders() {
-        if (!areThereAnyFinancialInstrumentsUnassignedToAnyDataLoader()) {
+        if (!financialInstrumentRepository.existsWithNoDataLoaderAssigned()) {
             log.debug("All financial instruments are assigned to data loaders.");
             return;
         }
-        List<FinancialInstrumentModel> unassignedFIs = new LinkedList<>(getFinancialInstrumentsUnassignedToAnyDataLoader());
+        List<FinancialInstrumentModel> unassignedFIs = new LinkedList<>(
+                financialInstrumentRepository.findUnassignedToAnyDataLoader(
+                        FinancialInstrumentRepository.OrderBy.CREATED_ON_ASC,
+                        financialInstrumentParametersProvider.getRecommendedNumberOfFinancialInstrumentsUnassignedToAnyDataLoader()
+                )
+        );
         List<DataLoaderModel> activeDataLoaders = new LinkedList<>(dataLoaderRepository.findActiveDataLoaders(
                 DataLoaderRepository.OrderBy.LAST_CONNECTED_ON_ASC,
                 dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader())
@@ -75,14 +81,4 @@ public class AssignUnassignedFinancialInstrumentToDataLoadersUseCase {
             }
         }
     }
-
-    private boolean areThereAnyFinancialInstrumentsUnassignedToAnyDataLoader() {
-        return financialInstrumentRepository.existsWithNoDataLoaderAssigned();
-    }
-
-    //TODO do poprawy
-    private Collection<FinancialInstrumentModel> getFinancialInstrumentsUnassignedToAnyDataLoader() {
-        return financialInstrumentRepository.find5UnassignedToAnyDataLoader();
-    }
-
 }

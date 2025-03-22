@@ -10,7 +10,7 @@ import java.util.Collection;
 public interface DataLoaderRepository {
 
     enum OrderBy {
-        LAST_CONNECTED_ON_DES,
+        LAST_CONNECTED_ON_DESC,
         LAST_CONNECTED_ON_ASC
     }
 

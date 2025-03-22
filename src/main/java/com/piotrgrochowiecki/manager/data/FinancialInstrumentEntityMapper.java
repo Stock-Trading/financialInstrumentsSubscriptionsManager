@@ -1,7 +1,9 @@
 package com.piotrgrochowiecki.manager.data;
 
 import com.piotrgrochowiecki.manager.domain.model.FinancialInstrumentModel;
+import com.piotrgrochowiecki.manager.domain.ports.FinancialInstrumentRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -24,6 +26,22 @@ class FinancialInstrumentEntityMapper {
                 .symbol(model.getSymbol())
                 .dataLoaderId(model.getDataLoaderId())
                 .build();
+    }
+
+    Sort mapToSort(FinancialInstrumentRepository.OrderBy orderBy) {
+        switch (orderBy) {
+            case CREATED_ON_ASC -> {
+                return Sort.sort(FinancialInstrumentEntity.class)
+                        .by(FinancialInstrumentEntity::getCreatedOn)
+                        .ascending();
+            }
+            case CREATED_ON_DESC -> {
+                return Sort.sort(FinancialInstrumentEntity.class)
+                        .by(FinancialInstrumentEntity::getCreatedOn)
+                        .descending();
+            }
+            default -> throw new IllegalArgumentException("Unknown enum " + orderBy.name());
+        }
     }
 
 }

@@ -8,9 +8,14 @@ import java.util.Collection;
 @Repository
 public interface FinancialInstrumentRepository {
 
+    enum OrderBy {
+        CREATED_ON_DESC,
+        CREATED_ON_ASC
+    }
+
     FinancialInstrumentModel save(FinancialInstrumentModel financialInstrumentModel);
 
-    Collection<FinancialInstrumentModel> find5UnassignedToAnyDataLoader();
+    Collection<FinancialInstrumentModel> findUnassignedToAnyDataLoader(OrderBy orderBy, Integer limit);
 
     boolean existsWithNoDataLoaderAssigned();
 

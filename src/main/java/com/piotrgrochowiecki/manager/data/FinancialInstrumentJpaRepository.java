@@ -2,6 +2,7 @@ package com.piotrgrochowiecki.manager.data;
 
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.QueryHint;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.QueryHints;
@@ -15,7 +16,7 @@ interface FinancialInstrumentJpaRepository extends JpaRepository<FinancialInstru
             @QueryHint(name = "jakarta.persistence.lock.timeout", value = "-2")
     })
         //Sets up SKIP LOCKED
-    List<FinancialInstrumentEntity> findTop5ByDataLoaderIsNull();
+    List<FinancialInstrumentEntity> findByDataLoaderIsNull(Pageable pageable);
 
     boolean existsByDataLoaderIdIsNull();
 

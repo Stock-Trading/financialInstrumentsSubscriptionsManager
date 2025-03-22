@@ -7,7 +7,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -35,7 +34,7 @@ class DataLoaderEntityMapper {
             model.setFinancialInstrumentModelCollection(entity.getFinancialInstrument()
                     .stream()
                     .map(financialInstrumentEntityMapper::mapToFinancialInstrumentModel)
-                    .collect(Collectors.toList())
+                    .toList()
             );
         }
         return model;
@@ -61,7 +60,7 @@ class DataLoaderEntityMapper {
                         .by(DataLoaderEntity::getLastConnectedOn)
                         .ascending();
             }
-            case DataLoaderRepository.OrderBy.LAST_CONNECTED_ON_DES -> {
+            case DataLoaderRepository.OrderBy.LAST_CONNECTED_ON_DESC -> {
                 return Sort.sort(DataLoaderEntity.class)
                         .by(DataLoaderEntity::getLastConnectedOn)
                         .descending();

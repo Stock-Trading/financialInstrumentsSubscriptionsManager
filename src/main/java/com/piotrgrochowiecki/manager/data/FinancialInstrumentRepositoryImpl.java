@@ -4,6 +4,9 @@ import com.piotrgrochowiecki.manager.domain.model.FinancialInstrumentModel;
 import com.piotrgrochowiecki.manager.domain.ports.FinancialInstrumentRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
@@ -25,8 +28,11 @@ class FinancialInstrumentRepositoryImpl implements FinancialInstrumentRepository
     }
 
     @Override
-    public Collection<FinancialInstrumentModel> find5UnassignedToAnyDataLoader() {
-        return jpaRepository.findTop5ByDataLoaderIsNull().stream()
+    public Collection<FinancialInstrumentModel> findUnassignedToAnyDataLoader(OrderBy orderBy, Integer limit) {
+        Sort sort = mapper.mapToSort(orderBy);
+        Pageable pageable = PageRequest.of(0, limit, sort);
+        return jpaRepository.findByDataLoaderIsNull(pageable)
+                .stream()
                 .map(mapper::mapToFinancialInstrumentModel)
                 .toList();
     }
