@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 @Log4j2
@@ -27,58 +28,96 @@ public class BalanceDataLoadersUseCase {
                         Duration.ofMillis(dataLoaderParametersProvider.getTimeThresholdOfHandlingReadinessMilliseconds()),
                         Duration.ofMillis(dataLoaderParametersProvider.getTimeThresholdOfHandlingReadinessMilliseconds()),
                         DataLoaderRepository.OrderBy.LAST_CONNECTED_ON_ASC,
-                        dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader()
-                )
+                        dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader())
                 .stream()
                 .toList();
 
         List<DataLoaderModel> dataLoadersWithMoreFIsThanRecommended = allDataLoaders.stream()
-                .filter(dataLoaderModel ->
-                        dataLoaderModel.getFinancialInstrumentModelCollection()
-                                .size()
-                                > dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader()
-                )
+                .filter(this::doesHaveMoreFIsThanRecommended)
                 .toList();
 
         List<DataLoaderModel> dataLoadersWithLessFIsThanRecommended = allDataLoaders.stream()
-                .filter(dataLoaderModel ->
-                        dataLoaderModel.getFinancialInstrumentModelCollection()
-                                .size()
-                                <= dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader()
-                )
+                .filter(this::doesHaveLessFIsThanRecommended)
                 .toList();
 
+        int totalNumberOfFreeSpots = computeNumberOfFreeSpots(dataLoadersWithLessFIsThanRecommended);
+
+        List<FinancialInstrumentModel> fIsToBeReassigned = getFIsToBeReassigned(dataLoadersWithMoreFIsThanRecommended,
+                totalNumberOfFreeSpots);
+
+        reassign(dataLoadersWithLessFIsThanRecommended, fIsToBeReassigned);
+    }
+
+    private boolean doesHaveMoreFIsThanRecommended(DataLoaderModel dataLoaderModel) {
+        return dataLoaderModel.getFinancialInstrumentModelCollection()
+                .size() > dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader();
+    }
+
+
+    private boolean doesHaveLessFIsThanRecommended(DataLoaderModel dataLoaderModel) {
+        return dataLoaderModel.getFinancialInstrumentModelCollection()
+                .size() < dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader();
+    }
+
+    private int computeNumberOfFreeSpots(List<DataLoaderModel> dataLoadersWithLessFIsThanRecommended) {
         int totalNumberOfFreeSpots = 0;
         for (DataLoaderModel dataLoader : dataLoadersWithLessFIsThanRecommended) {
             int numberOfFIs = dataLoader.getFinancialInstrumentModelCollection()
                     .size();
             int freeSpots = Math.subtractExact(
                     dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader(),
-                    numberOfFIs
-            );
+                    numberOfFIs);
             totalNumberOfFreeSpots += freeSpots;
         }
+        return totalNumberOfFreeSpots;
+    }
 
+    private List<FinancialInstrumentModel> getFIsToBeReassigned(List<DataLoaderModel> dataLoadersWithMoreFIsThanRecommended,
+                                                                int totalNumberOfFreeSpots) {
         List<FinancialInstrumentModel> fIsToBeReassigned = new ArrayList<>();
-        while (fIsToBeReassigned.size() <= totalNumberOfFreeSpots) {
+        while (fIsToBeReassigned.size() < totalNumberOfFreeSpots) {
+            boolean added = false;
             for (DataLoaderModel dataLoader : dataLoadersWithMoreFIsThanRecommended) {
-                List<FinancialInstrumentModel> temporaryListOfFIs = dataLoader.getFinancialInstrumentModelCollection()
+                List<FinancialInstrumentModel> originalCollectionOfFIs = new LinkedList<>(dataLoader.getFinancialInstrumentModelCollection());
+                List<FinancialInstrumentModel> excessiveFIs = originalCollectionOfFIs
                         .stream()
+                        .skip(dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader())
                         .toList();
-                for (int i = dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader(); i < temporaryListOfFIs.size() - 1; i++) {
-                    fIsToBeReassigned.add(temporaryListOfFIs.get(i));
-                }
-            }
-        }
 
+                for (FinancialInstrumentModel fi : excessiveFIs) {
+                    if (fIsToBeReassigned.size() < totalNumberOfFreeSpots) {
+                        fIsToBeReassigned.add(fi);
+                        added = true;
+                        originalCollectionOfFIs.remove(fi);
+                        dataLoader.setFinancialInstrumentModelCollection(originalCollectionOfFIs);
+                        dataLoaderRepository.save(dataLoader);
+                    } else {
+                        break;
+                    }
+                }
+                if (!added) break;
+            }
+            if (!added) break;
+        }
+        return fIsToBeReassigned;
+    }
+
+    private void reassign(List<DataLoaderModel> dataLoadersWithLessFIsThanRecommended,
+                          List<FinancialInstrumentModel> fIsToBeReassigned) {
         for (DataLoaderModel dataLoader : dataLoadersWithLessFIsThanRecommended) {
             List<FinancialInstrumentModel> fIsOfGivenDataLoader = new ArrayList<>(dataLoader.getFinancialInstrumentModelCollection()
                     .stream()
                     .toList());
+
             while (fIsOfGivenDataLoader.size() <= dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader()) {
+                if (fIsToBeReassigned.isEmpty()) {
+                    break;
+                }
                 fIsOfGivenDataLoader.add(fIsToBeReassigned.getFirst());
+                fIsToBeReassigned.remove(0);
             }
             dataLoader.setFinancialInstrumentModelCollection(fIsOfGivenDataLoader);
+            dataLoaderRepository.save(dataLoader);
         }
     }
 }
