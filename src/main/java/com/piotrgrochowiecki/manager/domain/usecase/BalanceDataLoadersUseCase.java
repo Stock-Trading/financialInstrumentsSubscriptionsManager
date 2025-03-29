@@ -90,12 +90,12 @@ public class BalanceDataLoadersUseCase {
                         added = true;
                         originalCollectionOfFIs.remove(fi);
                         dataLoader.setFinancialInstrumentModelCollection(originalCollectionOfFIs);
-                        dataLoaderRepository.save(dataLoader);
                     } else {
                         break;
                     }
                 }
                 if (!added) break;
+                dataLoaderRepository.save(dataLoader);
             }
             if (!added) break;
         }
@@ -109,7 +109,7 @@ public class BalanceDataLoadersUseCase {
                     .stream()
                     .toList());
 
-            while (fIsOfGivenDataLoader.size() <= dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader()) {
+            while (fIsOfGivenDataLoader.size() < dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader()) {
                 if (fIsToBeReassigned.isEmpty()) {
                     break;
                 }
