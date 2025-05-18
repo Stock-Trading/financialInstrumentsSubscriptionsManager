@@ -19,10 +19,10 @@ public class DataLoaderService {
 
     @Transactional
     public DataLoaderModel update(DataLoaderModel dataLoaderModel) {
-        if (Objects.isNull(dataLoaderModel.getId())) {
-            throw new DataLoaderServiceException("Cannot update Data Loader as its id is null");
-        }
-        return dataLoaderRepository.save(dataLoaderModel);
+        return Optional.of(dataLoaderModel)
+                .filter(it -> Objects.nonNull(it.getId()))
+                .map(dataLoaderRepository::save)
+                .orElseThrow(() -> new DataLoaderServiceException("Cannot update Data Loader as its id is null"));
     }
 
 }

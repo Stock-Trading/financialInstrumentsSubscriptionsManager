@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
+import java.util.Optional;
 
 @Log4j2
 @Service
@@ -18,11 +19,11 @@ public class FinancialInstrumentService {
     private final FinancialInstrumentRepository financialInstrumentRepository;
 
     @Transactional
-    public void update(FinancialInstrumentModel financialInstrumentModel) {
-        if (Objects.isNull(financialInstrumentModel.getId())) {
-            throw new FinancialInstrumentServiceException("Cannot update Financial Instrument as its id is null");
-        }
-        financialInstrumentRepository.save(financialInstrumentModel);
+    public FinancialInstrumentModel update(FinancialInstrumentModel financialInstrumentModel) {
+        return Optional.of(financialInstrumentModel)
+                .filter(it -> Objects.nonNull(it.getId()))
+                .map(financialInstrumentRepository::save)
+                .orElseThrow(() -> new FinancialInstrumentServiceException("Cannot update Financial Instrument as its id is null"));
     }
 
 }
