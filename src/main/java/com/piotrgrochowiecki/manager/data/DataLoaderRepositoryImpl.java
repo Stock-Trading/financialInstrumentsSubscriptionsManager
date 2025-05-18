@@ -1,5 +1,6 @@
 package com.piotrgrochowiecki.manager.data;
 
+import com.piotrgrochowiecki.manager.domain.exception.NotFoundException;
 import com.piotrgrochowiecki.manager.domain.model.DataLoaderModel;
 import com.piotrgrochowiecki.manager.domain.ports.DataLoaderRepository;
 import com.piotrgrochowiecki.manager.domain.service.TimeService;
@@ -38,7 +39,7 @@ public class DataLoaderRepositoryImpl implements DataLoaderRepository {
     public DataLoaderModel findByUuid(String dataLoaderUUID) {
         Optional<DataLoaderEntity> dataLoaderEntityOptional = jpaRepository.findByUuid(dataLoaderUUID);
         return mapper.mapToDataLoaderModel(dataLoaderEntityOptional.orElseThrow(
-                () -> new EntityNotFoundException("No DataLoaderEntity found with uuid " + dataLoaderUUID))
+                () -> new NotFoundException("No DataLoaderEntity found with uuid " + dataLoaderUUID))
         );
     }
 
