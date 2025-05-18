@@ -18,14 +18,14 @@ public interface DataLoaderRepository {
 
     DataLoaderModel findByUuid(String dataLoaderUUID);
 
-    Collection<DataLoaderModel> findActiveDataLoaders(OrderBy orderBy, Integer limit);
+    Collection<DataLoaderModel> findActiveDataLoaders(OrderBy orderBy, int limit);
 
-    Collection<DataLoaderModel> findReadyForHandling(OrderBy orderBy, Integer limit);
+    Collection<DataLoaderModel> findReadyForHandling(OrderBy orderBy, int limit);
 
     Collection<DataLoaderModel> findActiveAndUnhandledDataLoaders(Duration timeFromLastConnectionAsHealthThreshold,
                                                                   Duration timeFromLastHandledTimeAsUnhandledThreshold,
                                                                   OrderBy orderBy,
-                                                                  Integer limit);
+                                                                  int limit);
 
     boolean existsByUuid(String dataLoaderUUID);
 }

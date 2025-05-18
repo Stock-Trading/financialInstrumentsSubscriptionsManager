@@ -44,7 +44,7 @@ public class DataLoaderRepositoryImpl implements DataLoaderRepository {
     }
 
     @Override
-    public List<DataLoaderModel> findActiveDataLoaders(OrderBy orderBy, Integer limit) {
+    public List<DataLoaderModel> findActiveDataLoaders(OrderBy orderBy, int limit) {
         Sort sort = mapper.mapToSort(orderBy);
         Pageable pageable = PageRequest.of(0, limit, sort);
         return jpaRepository.findAllActive(pageable)
@@ -53,7 +53,7 @@ public class DataLoaderRepositoryImpl implements DataLoaderRepository {
                 .toList();
     }
 
-    public Collection<DataLoaderModel> findReadyForHandling(OrderBy orderBy, Integer limit) {
+    public Collection<DataLoaderModel> findReadyForHandling(OrderBy orderBy, int limit) {
         Sort sort = mapper.mapToSort(orderBy);
         Pageable pageable = PageRequest.of(0, limit, sort);
         return jpaRepository.findReadyForHandling(pageable)
@@ -66,7 +66,7 @@ public class DataLoaderRepositoryImpl implements DataLoaderRepository {
     public Collection<DataLoaderModel> findActiveAndUnhandledDataLoaders(Duration timeFromLastConnectionAsHealthThreshold,
                                                                          Duration timeFromLastHandledTimeAsUnhandledThreshold,
                                                                          OrderBy orderBy,
-                                                                         Integer limit) {
+                                                                         int limit) {
         Instant lastInstantCountingAsHealthy = timeService.getInstantUTC()
                 .minus(timeFromLastConnectionAsHealthThreshold);
         Instant firstInstantCountingAsUnhandled = timeService.getInstantUTC()

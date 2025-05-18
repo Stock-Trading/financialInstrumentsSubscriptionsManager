@@ -15,7 +15,7 @@ public interface FinancialInstrumentRepository {
 
     FinancialInstrumentModel save(FinancialInstrumentModel financialInstrumentModel);
 
-    Collection<FinancialInstrumentModel> findUnassignedToAnyDataLoader(OrderBy orderBy, Integer limit);
+    Collection<FinancialInstrumentModel> findUnassignedToAnyDataLoader(OrderBy orderBy, int limit);
 
     boolean existsWithNoDataLoaderAssigned();
 

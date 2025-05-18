@@ -28,7 +28,7 @@ class FinancialInstrumentRepositoryImpl implements FinancialInstrumentRepository
     }
 
     @Override
-    public Collection<FinancialInstrumentModel> findUnassignedToAnyDataLoader(OrderBy orderBy, Integer limit) {
+    public Collection<FinancialInstrumentModel> findUnassignedToAnyDataLoader(OrderBy orderBy, int limit) {
         Sort sort = mapper.mapToSort(orderBy);
         Pageable pageable = PageRequest.of(0, limit, sort);
         return jpaRepository.findByDataLoaderIsNull(pageable)
