@@ -2,7 +2,7 @@ package com.piotrgrochowiecki.manager.domain.usecase;
 
 import com.piotrgrochowiecki.manager.domain.component.DataLoaderParametersProvider;
 import com.piotrgrochowiecki.manager.domain.model.DataLoaderModel;
-import com.piotrgrochowiecki.manager.domain.ports.DataLoaderRepository;
+import com.piotrgrochowiecki.manager.domain.port.DataLoaderRepository;
 import com.piotrgrochowiecki.manager.domain.service.DataLoaderService;
 import com.piotrgrochowiecki.manager.domain.service.TimeService;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ import java.util.Collection;
 @Log4j2
 @Component
 @RequiredArgsConstructor
-public class CheckReadyForHandlingStatusOfDataLoaderUseCase {
+public class CheckForReadinessOfDataLoaderForAssignmentOfFinancialInstrumentsUseCase {
 
     private final DataLoaderRepository dataLoaderRepository;
     private final DataLoaderService dataLoaderService;
@@ -25,9 +25,10 @@ public class CheckReadyForHandlingStatusOfDataLoaderUseCase {
     private final DataLoaderParametersProvider dataLoaderParametersProvider;
 
     @Transactional
-    public void checkReadyForHandlingStatus() {
-        Collection<DataLoaderModel> dataLoaders = dataLoaderRepository.findReadyForHandling(
-                DataLoaderRepository.OrderBy.LAST_CONNECTED_ON_ASC,
+    public void checkIfDataLoadersAreReadyForAssignmentOfFinancialInstruments() {
+        Collection<DataLoaderModel> dataLoaders = dataLoaderRepository.findReadyForAssignmentOfFinancialInstruments(
+                DataLoaderRepository.OrderBy.LAST_INSTANT_OF_FINANCIAL_INSTRUMENTS_ASSIGNMENT_ASC, //retrieves data loaders based on lastInstantOfFinancialInstrumentsAssignment field
+                // starting with the oldest one (ASC)
                 dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader()
         );
         dataLoaders.forEach(this::checkReadyForHandlingStatusAndUpdate);
@@ -35,24 +36,21 @@ public class CheckReadyForHandlingStatusOfDataLoaderUseCase {
 
     private void checkReadyForHandlingStatusAndUpdate(DataLoaderModel dataLoader) {
         Instant lastInstantCountingAsReadyForHandling = timeService.getInstantUTC()
-                .minus(
-                        Duration.ofMillis(
-                                dataLoaderParametersProvider.getTimeThresholdOfHandlingReadinessMilliseconds()
-                        )
-                );
+                .minus(Duration.ofMillis(
+                                dataLoaderParametersProvider.getReadyForHandlingThresholdMilliseconds()));
         if (dataLoader.getLastConnectedOn()
                 .isBefore(lastInstantCountingAsReadyForHandling)) {
             log.info("""
                             Data Loader id={}, uuid={} last connected on {}, which is before last point in time
-                            counting as Ready for Handling. Setting its readyForHandling field to FALSE.
+                            counting as Ready for Handling. Setting its readyForHandling flag to FALSE.
                             Threshold of ready for handling is set to {} milliseconds
                             """,
                     dataLoader.getId(),
                     dataLoader.getUuid(),
                     dataLoader.getLastConnectedOn(),
-                    dataLoaderParametersProvider.getTimeThresholdOfHandlingReadinessMilliseconds()
+                    dataLoaderParametersProvider.getReadyForHandlingThresholdMilliseconds()
             );
-            dataLoader.setReadyForHandling(false);
+            dataLoader.setReadyForAssignmentOfFinancialInstruments(false);
             dataLoaderService.update(dataLoader);
         }
     }

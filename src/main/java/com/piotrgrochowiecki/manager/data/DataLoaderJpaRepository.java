@@ -37,19 +37,31 @@ interface DataLoaderJpaRepository extends JpaRepository<DataLoaderEntity, Long> 
             @QueryHint(name = "jakarta.persistence.lock.timeout",
                     value = "-2")
     })
+    List<DataLoaderEntity> findByActiveAndLastConnectedOnLessThan(Boolean activeStatus,
+                                                                  Instant lastConnectedOn,
+                                                                  Pageable pageable);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @QueryHints(value = {
+            @QueryHint(name = "jakarta.persistence.lock.timeout",
+                    value = "-2")
+    })
     @Query(value = """
             SELECT dl
             FROM DataLoaderEntity dl
-            WHERE dl.readyForHandling = true
+            WHERE dl.readyForAssignmentOfFinancialInstruments = true
             """)
-    List<DataLoaderEntity> findReadyForHandling(Pageable pageable);
+    List<DataLoaderEntity> findReadyForAssignmentOfFinancialInstruments(Pageable pageable);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @QueryHints(value = {
             @QueryHint(name = "jakarta.persistence.lock.timeout", value = "-2")
     })
-    List<DataLoaderEntity> findByLastConnectedOnGreaterThanAndLastHandledOnLessThanEqual(Instant lastConnectedOn,
-                                                                                         Instant firstHandledOn,
-                                                                                         Pageable pageable);
+    List<DataLoaderEntity> findByLastConnectedOnGreaterThanAndLastInstantOfFinancialInstrumentsAssignmentLessThanEqual(Instant lastConnectedOn,
+                                                                                                                       Instant firstHandledOn,
+                                                                                                                       Pageable pageable);
 
+    List<DataLoaderEntity> findByLoadStatusAndReadyForAssignmentOfFinancialInstruments(String status,
+                                                                                       Boolean readyForAssignmentOfFinancialInstruments,
+                                                                                       Pageable pageable);
 }

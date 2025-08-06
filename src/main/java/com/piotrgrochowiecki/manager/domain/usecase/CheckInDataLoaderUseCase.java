@@ -1,7 +1,7 @@
 package com.piotrgrochowiecki.manager.domain.usecase;
 
 import com.piotrgrochowiecki.manager.domain.model.DataLoaderModel;
-import com.piotrgrochowiecki.manager.domain.ports.DataLoaderRepository;
+import com.piotrgrochowiecki.manager.domain.port.DataLoaderRepository;
 import com.piotrgrochowiecki.manager.domain.service.DataLoaderService;
 import com.piotrgrochowiecki.manager.domain.service.TimeService;
 import lombok.RequiredArgsConstructor;
@@ -20,10 +20,11 @@ public class CheckInDataLoaderUseCase {
 
     @Transactional
     public DataLoaderModel checkIn(String dataLoaderUuid) {
+        log.debug("Checking in data loader with uuid {}", dataLoaderUuid);
         DataLoaderModel dataLoaderModel = dataLoaderRepository.findByUuid(dataLoaderUuid);
         dataLoaderModel.setLastConnectedOn(timeService.getInstantUTC());
         dataLoaderModel.setActive(true);
-        dataLoaderModel.setReadyForHandling(true);
+        dataLoaderModel.setReadyForAssignmentOfFinancialInstruments(true);
         return dataLoaderService.update(dataLoaderModel);
     }
 

@@ -16,8 +16,9 @@ interface FinancialInstrumentJpaRepository extends JpaRepository<FinancialInstru
             @QueryHint(name = "jakarta.persistence.lock.timeout", value = "-2")
     })
         //Sets up SKIP LOCKED
-    List<FinancialInstrumentEntity> findByDataLoaderIsNull(Pageable pageable);
+    List<FinancialInstrumentEntity> findByDataLoaderIdIsNull(Pageable pageable);
 
     boolean existsByDataLoaderIdIsNull();
 
+    List<FinancialInstrumentEntity> findByDataLoaderId(Long dataLoaderId);
 }

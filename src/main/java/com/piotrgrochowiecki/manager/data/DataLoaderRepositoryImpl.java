@@ -2,7 +2,7 @@ package com.piotrgrochowiecki.manager.data;
 
 import com.piotrgrochowiecki.manager.domain.exception.NotFoundException;
 import com.piotrgrochowiecki.manager.domain.model.DataLoaderModel;
-import com.piotrgrochowiecki.manager.domain.ports.DataLoaderRepository;
+import com.piotrgrochowiecki.manager.domain.port.DataLoaderRepository;
 import com.piotrgrochowiecki.manager.domain.service.TimeService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -53,28 +53,54 @@ public class DataLoaderRepositoryImpl implements DataLoaderRepository {
                 .toList();
     }
 
-    public Collection<DataLoaderModel> findReadyForHandling(OrderBy orderBy, int limit) {
+    @Override
+    public Collection<DataLoaderModel> findActiveDataLoadersAndLastConnectedEarlierThen(OrderBy orderBy, Instant lastConnectedThreshold, int limit) {
         Sort sort = mapper.mapToSort(orderBy);
         Pageable pageable = PageRequest.of(0, limit, sort);
-        return jpaRepository.findReadyForHandling(pageable)
+        return jpaRepository.findByActiveAndLastConnectedOnLessThan(true, lastConnectedThreshold, pageable)
                 .stream()
                 .map(mapper::mapToDataLoaderModel)
                 .toList();
     }
 
-    @Override
-    public Collection<DataLoaderModel> findActiveAndUnhandledDataLoaders(Duration timeFromLastConnectionAsHealthThreshold,
-                                                                         Duration timeFromLastHandledTimeAsUnhandledThreshold,
-                                                                         OrderBy orderBy,
-                                                                         int limit) {
-        Instant lastInstantCountingAsHealthy = timeService.getInstantUTC()
-                .minus(timeFromLastConnectionAsHealthThreshold);
-        Instant firstInstantCountingAsUnhandled = timeService.getInstantUTC()
-                .minus(timeFromLastHandledTimeAsUnhandledThreshold);
+    public Collection<DataLoaderModel> findReadyForAssignmentOfFinancialInstruments(OrderBy orderBy, int limit) {
         Sort sort = mapper.mapToSort(orderBy);
         Pageable pageable = PageRequest.of(0, limit, sort);
-        return jpaRepository.findByLastConnectedOnGreaterThanAndLastHandledOnLessThanEqual(lastInstantCountingAsHealthy,
-                        firstInstantCountingAsUnhandled,
+        return jpaRepository.findReadyForAssignmentOfFinancialInstruments(pageable)
+                .stream()
+                .map(mapper::mapToDataLoaderModel)
+                .toList();
+    }
+
+//    @Override
+//    public Collection<DataLoaderModel> findActiveAndUnhandledDataLoaders(Duration timeFromLastConnectionAsHealthThreshold,
+//                                                                         Duration timeFromLastHandledTimeAsUnhandledThreshold,
+//                                                                         OrderBy orderBy,
+//                                                                         int limit) {
+//        Instant lastInstantCountingAsHealthy = timeService.getInstantUTC()
+//                .minus(timeFromLastConnectionAsHealthThreshold);
+//        Instant firstInstantCountingAsUnhandled = timeService.getInstantUTC()
+//                .minus(timeFromLastHandledTimeAsUnhandledThreshold);
+//        Sort sort = mapper.mapToSort(orderBy);
+//        Pageable pageable = PageRequest.of(0, limit, sort);
+//        return jpaRepository.findByLastConnectedOnGreaterThanAndLastInstantOfFinancialInstrumentsAssignmentLessThanEqual(lastInstantCountingAsHealthy,
+//                        firstInstantCountingAsUnhandled,
+//                        pageable)
+//                .stream()
+//                .map(mapper::mapToDataLoaderModel)
+//                .toList();
+//    }
+
+    @Override
+    public Collection<DataLoaderModel> findBasedOnLoadStatusAndReadinessForAssignmentOfFinancialInstruments(DataLoaderModel.Status loadStatus,
+                                                                                                            boolean readyForAssignmentOfFinancialInstruments,
+                                                                                                            OrderBy orderBy,
+                                                                                                            int limit) {
+        Sort sort = mapper.mapToSort(OrderBy.LAST_INSTANT_OF_FINANCIAL_INSTRUMENTS_ASSIGNMENT_ASC);
+        Pageable pageable = PageRequest.of(0, limit, sort);
+        String loadStatusStr = loadStatus.getDbValue();
+        return jpaRepository.findByLoadStatusAndReadyForAssignmentOfFinancialInstruments(loadStatusStr,
+                        readyForAssignmentOfFinancialInstruments,
                         pageable)
                 .stream()
                 .map(mapper::mapToDataLoaderModel)

@@ -2,7 +2,7 @@ package com.piotrgrochowiecki.manager.domain.usecase;
 
 import com.piotrgrochowiecki.manager.domain.exception.ModelAlreadyExistsException;
 import com.piotrgrochowiecki.manager.domain.model.DataLoaderModel;
-import com.piotrgrochowiecki.manager.domain.ports.DataLoaderRepository;
+import com.piotrgrochowiecki.manager.domain.port.DataLoaderRepository;
 import com.piotrgrochowiecki.manager.domain.service.TimeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -27,6 +27,9 @@ public class RegisterDataLoaderUseCase {
         DataLoaderModel dataLoaderModel = DataLoaderModel.builder()
                 .uuid(dataLoaderUuid)
                 .lastConnectedOn(timeService.getInstantUTC())
+                .active(true)
+                .loadStatus(DataLoaderModel.Status.TOO_LOW)
+                .readyForAssignmentOfFinancialInstruments(true)
                 .build();
         return dataLoaderRepository.save(dataLoaderModel);
     }

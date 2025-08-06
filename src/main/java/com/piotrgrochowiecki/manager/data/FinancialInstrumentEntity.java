@@ -29,7 +29,4 @@ class FinancialInstrumentEntity {
     Instant createdOn;
     @Column(name = "data_loader_id")
     Long dataLoaderId;
-    @ManyToOne
-    @JoinColumn(name = "data_loader_id", referencedColumnName = "id", insertable = false, updatable = false)
-    DataLoaderEntity dataLoader;
 }

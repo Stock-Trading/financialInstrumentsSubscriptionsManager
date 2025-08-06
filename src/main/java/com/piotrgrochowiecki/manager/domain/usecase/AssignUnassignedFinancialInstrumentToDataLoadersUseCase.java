@@ -3,9 +3,9 @@ package com.piotrgrochowiecki.manager.domain.usecase;
 import com.piotrgrochowiecki.manager.domain.component.FinancialInstrumentParametersProvider;
 import com.piotrgrochowiecki.manager.domain.model.DataLoaderModel;
 import com.piotrgrochowiecki.manager.domain.model.FinancialInstrumentModel;
-import com.piotrgrochowiecki.manager.domain.ports.DataLoaderRepository;
+import com.piotrgrochowiecki.manager.domain.port.DataLoaderRepository;
 import com.piotrgrochowiecki.manager.domain.component.DataLoaderParametersProvider;
-import com.piotrgrochowiecki.manager.domain.ports.FinancialInstrumentRepository;
+import com.piotrgrochowiecki.manager.domain.port.FinancialInstrumentRepository;
 import com.piotrgrochowiecki.manager.domain.service.FinancialInstrumentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -35,14 +35,12 @@ public class AssignUnassignedFinancialInstrumentToDataLoadersUseCase {
         List<FinancialInstrumentModel> unassignedFIs = new LinkedList<>(
                 financialInstrumentRepository.findUnassignedToAnyDataLoader(
                         FinancialInstrumentRepository.OrderBy.CREATED_ON_ASC,
-                        financialInstrumentParametersProvider.getRecommendedNumberOfFinancialInstrumentsUnassignedToAnyDataLoader()
-                )
-        );
-        List<DataLoaderModel> activeDataLoaders = new LinkedList<>(dataLoaderRepository.findActiveDataLoaders(
-                DataLoaderRepository.OrderBy.LAST_CONNECTED_ON_ASC,
-                dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader())
-        );
-        assignFIsToDLs(unassignedFIs, activeDataLoaders);
+                        financialInstrumentParametersProvider.getRecommendedNumberOfFinancialInstrumentsUnassignedToAnyDataLoader()));
+        List<DataLoaderModel> dataLoadersReadyForAssignmentOfFinancialInstruments = new LinkedList<>(
+                dataLoaderRepository.findReadyForAssignmentOfFinancialInstruments(
+                        DataLoaderRepository.OrderBy.LAST_CONNECTED_ON_ASC,
+                        dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader()));
+        assignFIsToDLs(unassignedFIs, dataLoadersReadyForAssignmentOfFinancialInstruments);
     }
 
     private void assignFIsToDLs(List<FinancialInstrumentModel> financialInstrumentModelList,
@@ -51,34 +49,14 @@ public class AssignUnassignedFinancialInstrumentToDataLoadersUseCase {
             log.debug("Financial Instrument list or Data Loaders list is empty. Cannot assign FIs to DLs.");
             return;
         }
-        int sizeOfDataLoaderList = dataLoaderModelList.size();
-        int indexOfDLforFIassignement = 0;
 
-        if (sizeOfDataLoaderList == 1) {
-            log.debug("There is one available Data Loader (id={}, uuid={}). Assigning {} Financial Instruments" +
-                            " into it.",
-                    dataLoaderModelList.getFirst().getId(), dataLoaderModelList.getFirst().getUuid(),
-                    financialInstrumentModelList.size());
-            DataLoaderModel dataLoader = dataLoaderModelList.getFirst();
-            financialInstrumentModelList.forEach(financialInstrumentModel -> {
-                financialInstrumentModel.setDataLoaderId(dataLoader.getId());
-                financialInstrumentService.update(financialInstrumentModel);
-            });
-            return;
-        }
-        while (!financialInstrumentModelList.isEmpty()) {
-            FinancialInstrumentModel financialInstrumentModel = financialInstrumentModelList.getFirst();
-            DataLoaderModel dataLoader = dataLoaderModelList.get(indexOfDLforFIassignement);
-            financialInstrumentModel.setDataLoaderId(dataLoader.getId());
-            log.debug("Assigned Data Loader with id {} to Financial Instrument {}",
-                    dataLoader.getId(), financialInstrumentModel.getName());
-            financialInstrumentService.update(financialInstrumentModel);
-            financialInstrumentModelList.removeFirst();
-            indexOfDLforFIassignement++;
-            if (indexOfDLforFIassignement == sizeOfDataLoaderList - 1) {
-                indexOfDLforFIassignement = 0;
-                log.info("Starting another round of reassigning Financial Instruments to Data Loaders.");
-            }
+        for (int i = 0; i < financialInstrumentModelList.size(); i++) {
+            FinancialInstrumentModel financialInstrument = financialInstrumentModelList.get(i);
+            DataLoaderModel dataLoader = dataLoaderModelList.get(i % dataLoaderModelList.size());
+            financialInstrument.setDataLoaderId(dataLoader.getId());
+            log.debug("Assigned Data Loader with id {} to Financial Instrument {}, id={}",
+                    dataLoader.getId(), financialInstrument.getName(), financialInstrument.getId());
+            financialInstrumentService.update(financialInstrument);
         }
     }
 }

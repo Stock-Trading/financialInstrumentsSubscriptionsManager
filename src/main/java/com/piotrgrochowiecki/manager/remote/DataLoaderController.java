@@ -4,11 +4,12 @@ import com.piotrgrochowiecki.manager.domain.model.DataLoaderModel;
 import com.piotrgrochowiecki.manager.domain.usecase.CheckInDataLoaderUseCase;
 import com.piotrgrochowiecki.manager.domain.usecase.RegisterDataLoaderUseCase;
 import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
+@Log4j2
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/internal/dataLoader")
@@ -26,6 +27,7 @@ class DataLoaderController {
 
     @PutMapping("/{dataLoaderUuid}/last-connection-time")
     DataLoaderResponseDto handleCheckInRequest(@PathVariable String dataLoaderUuid) {
+        log.debug("Received check-in request from data loader with uuid {}", dataLoaderUuid);
         DataLoaderModel dataLoaderModel = checkInDataLoaderUseCase.checkIn(dataLoaderUuid);
         return mapper.mapToDto(dataLoaderModel);
     }

@@ -2,7 +2,7 @@ package com.piotrgrochowiecki.manager.domain.service;
 
 import com.piotrgrochowiecki.manager.domain.exception.FinancialInstrumentServiceException;
 import com.piotrgrochowiecki.manager.domain.model.FinancialInstrumentModel;
-import com.piotrgrochowiecki.manager.domain.ports.FinancialInstrumentRepository;
+import com.piotrgrochowiecki.manager.domain.port.FinancialInstrumentRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;

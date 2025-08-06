@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import java.time.Instant;
-import java.util.Collection;
 
 @Entity
 @Table(name = "data_loader")
@@ -23,16 +22,12 @@ class DataLoaderEntity {
     String uuid;
     @Column(name = "last_connected_on", nullable = false)
     Instant lastConnectedOn;
-    @Column(name = "last_handled_on")
-    Instant lastHandledOn;
+    @Column(name = "last_instant_of_financial_instruments_assignment")
+    Instant lastInstantOfFinancialInstrumentsAssignment;
     @Column(name = "active", nullable = false)
     Boolean active;
-    @Column(name = "ready_for_handling", nullable = false)
-    Boolean readyForHandling;
+    @Column(name = "ready_for_assignment_of_financial_instruments", nullable = false)
+    Boolean readyForAssignmentOfFinancialInstruments;
     @Column(name = "load_status")
     String loadStatus;
-    @OneToMany(cascade = CascadeType.ALL,
-            fetch = FetchType.LAZY,
-            mappedBy = "dataLoader")
-    Collection<FinancialInstrumentEntity> financialInstrument;
 }

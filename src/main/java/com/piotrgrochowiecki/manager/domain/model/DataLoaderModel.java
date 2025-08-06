@@ -4,29 +4,36 @@ import lombok.*;
 
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.Collection;
 
 @Builder
 @Getter
 @Setter
 @EqualsAndHashCode(of = "id")
+@ToString
 public class DataLoaderModel {
 
     private Long id;
     private String uuid;
     private Instant lastConnectedOn;
-    private Instant lastHandledOn;
+    private Instant lastInstantOfFinancialInstrumentsAssignment;
+    /**
+     * This status is set based on last connection time (lastConnectedOn) of the Data Loader
+     */
     private Boolean active;
-    private Boolean readyForHandling;
+    /**
+     * This status describes readiness state, with a slightly longer threshold compared to active flag,
+     * to ensure Data Loader is fully available for assignments of Financial Instruments.
+     */
+    private Boolean readyForAssignmentOfFinancialInstruments;
     private Status loadStatus;
-    private Collection<FinancialInstrumentModel> financialInstrumentModelCollection;
+    //TODO rozważyć dodanie liczby aktualnie przypisanych instrumentów, która jest na bieżąco aktualizowana
 
     @Getter
     @RequiredArgsConstructor
     public enum Status {
-        TOO_HIGH("too_high"),
-        TOO_LOW("too_low"),
-        BALANCED("balanced");
+        TOO_HIGH("TOO_HIGH"),
+        TOO_LOW("TOO_LOW"),
+        BALANCED("BALANCED");
 
         private final String dbValue;
 

@@ -1,7 +1,7 @@
 package com.piotrgrochowiecki.manager.data;
 
 import com.piotrgrochowiecki.manager.domain.model.FinancialInstrumentModel;
-import com.piotrgrochowiecki.manager.domain.ports.FinancialInstrumentRepository;
+import com.piotrgrochowiecki.manager.domain.port.FinancialInstrumentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;

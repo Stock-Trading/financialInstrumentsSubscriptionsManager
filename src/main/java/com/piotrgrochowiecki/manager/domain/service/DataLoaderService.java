@@ -2,7 +2,7 @@ package com.piotrgrochowiecki.manager.domain.service;
 
 import com.piotrgrochowiecki.manager.domain.exception.DataLoaderServiceException;
 import com.piotrgrochowiecki.manager.domain.model.DataLoaderModel;
-import com.piotrgrochowiecki.manager.domain.ports.DataLoaderRepository;
+import com.piotrgrochowiecki.manager.domain.port.DataLoaderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -19,6 +19,7 @@ public class DataLoaderService {
 
     @Transactional
     public DataLoaderModel update(DataLoaderModel dataLoaderModel) {
+        log.debug("Updating data loader {}", dataLoaderModel.toString());
         return Optional.of(dataLoaderModel)
                 .filter(it -> Objects.nonNull(it.getId()))
                 .map(dataLoaderRepository::save)

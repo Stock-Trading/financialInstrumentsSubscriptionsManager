@@ -8,13 +8,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class DataLoaderParametersProvider {
 
-    @Value("${dataLoader.lastCheckInHealthThreshold.millisecond}")
-    private int lastCheckedInHealthThresholdMilliseconds;
+    @Value("${dataLoader.activeThreshold.millisecond}")
+    private int activeThresholdMilliseconds;
 
     @Value("${dataLoader.recommendedNumberOfFinancialInstrumentsPerDataLoader}")
     private int recommendedNumberOfFinancialInstrumentsPerDataLoader;
 
-    @Value("${dataLoader.timeThresholdOfHandlingReadiness.millisecond}")
-    private int timeThresholdOfHandlingReadinessMilliseconds;
+    @Value("${dataLoader.readyForHandlingThreshold.millisecond}")
+    private int readyForHandlingThresholdMilliseconds;
+
+    @Value("${dataLoader.numberOfDataLoadersHandledByManagerInOneReassignmentCycle}")
+    private int numberOfDataLoadersHandledByManagerInOneCycle;
 
 }

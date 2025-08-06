@@ -1,43 +1,29 @@
 package com.piotrgrochowiecki.manager.data;
 
 import com.piotrgrochowiecki.manager.domain.model.DataLoaderModel;
-import com.piotrgrochowiecki.manager.domain.ports.DataLoaderRepository;
+import com.piotrgrochowiecki.manager.domain.port.DataLoaderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
-import java.util.Objects;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
 class DataLoaderEntityMapper {
 
-    private final FinancialInstrumentEntityMapper financialInstrumentEntityMapper;
-
     DataLoaderModel mapToDataLoaderModel(DataLoaderEntity entity) {
-        DataLoaderModel model = DataLoaderModel.builder()
+        return DataLoaderModel.builder()
                 .id(entity.getId())
                 .uuid(entity.getUuid())
                 .lastConnectedOn(entity.getLastConnectedOn())
-                .lastHandledOn(entity.getLastHandledOn())
-                .readyForHandling(entity.getReadyForHandling())
-                .loadStatus(
-                        DataLoaderModel.Status
-                                .getStatusByDbValue(
-                                        entity.getLoadStatus()
-                                )
-                )
+                .lastInstantOfFinancialInstrumentsAssignment(entity.getLastInstantOfFinancialInstrumentsAssignment())
+                .readyForAssignmentOfFinancialInstruments(entity.getReadyForAssignmentOfFinancialInstruments())
+                .loadStatus(Optional.ofNullable(entity.getLoadStatus())
+                        .map(DataLoaderModel.Status::getStatusByDbValue)
+                        .orElse(null))
                 .active(entity.getActive())
                 .build();
-
-        if (!Objects.isNull(entity.getFinancialInstrument())) {
-            model.setFinancialInstrumentModelCollection(entity.getFinancialInstrument()
-                    .stream()
-                    .map(financialInstrumentEntityMapper::mapToFinancialInstrumentModel)
-                    .toList()
-            );
-        }
-        return model;
     }
 
     DataLoaderEntity mapToDataLoaderEntity(DataLoaderModel model) {
@@ -45,11 +31,12 @@ class DataLoaderEntityMapper {
                 .id(model.getId())
                 .uuid(model.getUuid())
                 .lastConnectedOn(model.getLastConnectedOn())
-                .lastHandledOn(model.getLastHandledOn())
+                .lastInstantOfFinancialInstrumentsAssignment(model.getLastInstantOfFinancialInstrumentsAssignment())
                 .active(model.getActive())
-                .readyForHandling(model.getReadyForHandling())
-                .loadStatus(model.getLoadStatus()
-                        .getDbValue())
+                .readyForAssignmentOfFinancialInstruments(model.getReadyForAssignmentOfFinancialInstruments())
+                .loadStatus(Optional.ofNullable(model.getLoadStatus())
+                        .map(DataLoaderModel.Status::getDbValue)
+                        .orElse(null))
                 .build();
     }
 
@@ -63,6 +50,16 @@ class DataLoaderEntityMapper {
             case DataLoaderRepository.OrderBy.LAST_CONNECTED_ON_DESC -> {
                 return Sort.sort(DataLoaderEntity.class)
                         .by(DataLoaderEntity::getLastConnectedOn)
+                        .descending();
+            }
+            case DataLoaderRepository.OrderBy.LAST_INSTANT_OF_FINANCIAL_INSTRUMENTS_ASSIGNMENT_ASC -> {
+                return Sort.sort(DataLoaderEntity.class)
+                        .by(DataLoaderEntity::getLastInstantOfFinancialInstrumentsAssignment)
+                        .ascending();
+            }
+            case DataLoaderRepository.OrderBy.LAST_INSTANT_OF_FINANCIAL_INSTRUMENTS_ASSIGNMENT_DESC -> {
+                return Sort.sort(DataLoaderEntity.class)
+                        .by(DataLoaderEntity::getLastInstantOfFinancialInstrumentsAssignment)
                         .descending();
             }
             default -> throw new IllegalArgumentException("Unknown enum " + orderBy.name());

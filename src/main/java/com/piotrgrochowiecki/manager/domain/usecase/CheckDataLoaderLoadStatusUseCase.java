@@ -2,7 +2,8 @@ package com.piotrgrochowiecki.manager.domain.usecase;
 
 import com.piotrgrochowiecki.manager.domain.component.DataLoaderParametersProvider;
 import com.piotrgrochowiecki.manager.domain.model.DataLoaderModel;
-import com.piotrgrochowiecki.manager.domain.ports.DataLoaderRepository;
+import com.piotrgrochowiecki.manager.domain.port.DataLoaderRepository;
+import com.piotrgrochowiecki.manager.domain.port.FinancialInstrumentRepository;
 import com.piotrgrochowiecki.manager.domain.service.DataLoaderService;
 import com.piotrgrochowiecki.manager.domain.service.TimeService;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ public class CheckDataLoaderLoadStatusUseCase {
 
     private final DataLoaderParametersProvider dataLoaderParametersProvider;
     private final DataLoaderRepository dataLoaderRepository;
+    private final FinancialInstrumentRepository financialInstrumentRepository;
     private final DataLoaderService dataLoaderService;
     private final TimeService timeService;
 
@@ -26,15 +28,16 @@ public class CheckDataLoaderLoadStatusUseCase {
     public void checkLoadStatus() {
         List<DataLoaderModel> dataLoaderModelList = dataLoaderRepository.findActiveDataLoaders(
                         DataLoaderRepository.OrderBy.LAST_CONNECTED_ON_ASC,
-                        dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader()
-                )
+                        dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader())
                 .stream()
                 .toList();
         dataLoaderModelList.forEach(this::checkAndUpdateLoadStatus);
     }
 
     private void checkAndUpdateLoadStatus(DataLoaderModel dataLoader) {
-        int numberOfFIsAssigned = dataLoader.getFinancialInstrumentModelCollection().size();
+        int numberOfFIsAssigned = financialInstrumentRepository.findByDataLoaderId(dataLoader
+                        .getId())
+                .size();
         DataLoaderModel.Status loadStatus;
         if (numberOfFIsAssigned == dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader()) {
             loadStatus = DataLoaderModel.Status.BALANCED;
@@ -44,7 +47,8 @@ public class CheckDataLoaderLoadStatusUseCase {
             loadStatus = DataLoaderModel.Status.TOO_HIGH;
         }
         dataLoader.setLoadStatus(loadStatus);
-        dataLoader.setLastHandledOn(timeService.getInstantUTC()); //updates time of handling, so other services retrieve records with "oldest" lastHandledOn field
+        dataLoader.setLastInstantOfFinancialInstrumentsAssignment(timeService.getInstantUTC()); //updates time of handling, so other instances of this
+        // service can retrieve records with "oldest" lastInstantOfFinancialInstrumentsAssignment field in CheckReadyForHandlingStatus
         log.debug("""
                         Data Loader with id {} has {} Financial Instruments assigned to it and its load status is {}.
                         Number of recommended financial instruments per data loader is {}.
