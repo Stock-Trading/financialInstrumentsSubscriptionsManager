@@ -26,15 +26,18 @@ public class CheckForReadinessOfDataLoaderForAssignmentOfFinancialInstrumentsUse
 
     @Transactional
     public void checkIfDataLoadersAreReadyForAssignmentOfFinancialInstruments() {
+        log.debug("Retrieving Data Loaders that are ready for assignment of Financial Instruments");
         Collection<DataLoaderModel> dataLoaders = dataLoaderRepository.findReadyForAssignmentOfFinancialInstruments(
                 DataLoaderRepository.OrderBy.LAST_INSTANT_OF_FINANCIAL_INSTRUMENTS_ASSIGNMENT_ASC, //retrieves data loaders based on lastInstantOfFinancialInstrumentsAssignment field
                 // starting with the oldest one (ASC)
                 dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader()
         );
-        dataLoaders.forEach(this::checkReadyForHandlingStatusAndUpdate);
+        log.debug("List of Data Loaders contains {} objects", dataLoaders.size());
+        dataLoaders.forEach(this::checkIfReadyForAssignmentOfFinancialInstrumentsAndUpdate);
     }
 
-    private void checkReadyForHandlingStatusAndUpdate(DataLoaderModel dataLoader) {
+    private void checkIfReadyForAssignmentOfFinancialInstrumentsAndUpdate(DataLoaderModel dataLoader) {
+        log.debug("Checking if dataLoader {} is ready for assignment of Financial Instruments", dataLoader.toString());
         Instant lastInstantCountingAsReadyForHandling = timeService.getInstantUTC()
                 .minus(Duration.ofMillis(
                                 dataLoaderParametersProvider.getReadyForHandlingThresholdMilliseconds()));
@@ -42,12 +45,14 @@ public class CheckForReadinessOfDataLoaderForAssignmentOfFinancialInstrumentsUse
                 .isBefore(lastInstantCountingAsReadyForHandling)) {
             log.info("""
                             Data Loader id={}, uuid={} last connected on {}, which is before last point in time
-                            counting as Ready for Handling. Setting its readyForHandling flag to FALSE.
+                            counting as readyForAssignmentOfFinancialInstruments {}.
+                            Setting its readyForAssignmentOfFinancialInstruments flag to false.
                             Threshold of ready for handling is set to {} milliseconds
                             """,
                     dataLoader.getId(),
                     dataLoader.getUuid(),
                     dataLoader.getLastConnectedOn(),
+                    lastInstantCountingAsReadyForHandling,
                     dataLoaderParametersProvider.getReadyForHandlingThresholdMilliseconds()
             );
             dataLoader.setReadyForAssignmentOfFinancialInstruments(false);
