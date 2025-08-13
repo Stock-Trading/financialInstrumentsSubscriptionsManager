@@ -42,7 +42,7 @@ public class SchedulerService {
         assignUnassignedFinancialInstrumentToDataLoadersUseCase.assignUnassignedInstrumentsToActiveDataLoaders();
     }
 
-    //    @Scheduled(fixedDelay = 12_000) //TODO rozważyć zmniejszenie częstotliwości
+        @Scheduled(fixedDelay = 12_000) //TODO rozważyć zmniejszenie częstotliwości
     public void unassignFinancialInstrumentsFromDataLoadersWithTooHighLoadStatus() {
         log.debug("Running regular task of unassigning Financial Instruments from Data Loaders with too high load status");
         unassignFinancialInstrumentFromDataLoaderUseCase.unassignFinancialInstrumentsFromDataLoaderWithTooHighLoadStatus();
