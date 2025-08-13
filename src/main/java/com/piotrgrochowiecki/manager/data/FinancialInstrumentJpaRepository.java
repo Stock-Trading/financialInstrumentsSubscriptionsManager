@@ -21,4 +21,6 @@ interface FinancialInstrumentJpaRepository extends JpaRepository<FinancialInstru
     boolean existsByDataLoaderIdIsNull();
 
     List<FinancialInstrumentEntity> findByDataLoaderId(Long dataLoaderId);
+
+    Long countByDataLoaderId(Long dataLoaderId);
 }

@@ -26,37 +26,46 @@ public class CheckDataLoaderLoadStatusUseCase {
 
     @Transactional
     public void checkLoadStatus() {
+        log.debug("Retrieving Data Loaders to check their load status");
         List<DataLoaderModel> dataLoaderModelList = dataLoaderRepository.findActiveDataLoaders(
                         DataLoaderRepository.OrderBy.LAST_CONNECTED_ON_ASC,
                         dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader())
                 .stream()
                 .toList();
+        log.debug("List of Data Loaders contains {} objects", dataLoaderModelList.size());
         dataLoaderModelList.forEach(this::checkAndUpdateLoadStatus);
     }
 
     private void checkAndUpdateLoadStatus(DataLoaderModel dataLoader) {
-        int numberOfFIsAssigned = financialInstrumentRepository.findByDataLoaderId(dataLoader
-                        .getId())
-                .size();
+        log.debug("Checking load status of dataLoader {}", dataLoader.toString());
+        long numberOfAssignedFinancialInstruments = financialInstrumentRepository.findNumberOfFinancialInstrumentsAssignedToDataLoader(
+                dataLoader.getId());
+        log.debug("Number of assigned Financial Instruments: {}", numberOfAssignedFinancialInstruments);
+        DataLoaderModel.Status loadStatus = getStatus(numberOfAssignedFinancialInstruments);
+        dataLoader.setLoadStatus(loadStatus);
+        dataLoader.setLastInstantOfFinancialInstrumentsAssignment(timeService.getInstantUTC()); //updates time of last time
+        // assignment of Financial Instruments, so other instances of this service can retrieve records with "oldest"
+        // lastInstantOfFinancialInstrumentsAssignment field in CheckForReadinessOfDataLoaderForAssignmentOfFinancialInstrumentsUseCase
+        log.debug("""
+                        Data Loader with id {}, uuid {} has {} Financial Instruments assigned to it and its load status is {}. Number of recommended Financial Instruments per Data Loader is {}.
+                        """,
+                dataLoader.getId(),
+                dataLoader.getUuid(),
+                numberOfAssignedFinancialInstruments,
+                loadStatus,
+                dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader());
+        dataLoaderService.update(dataLoader);
+    }
+
+    private DataLoaderModel.Status getStatus(long numberOfAssignedFinancialInstruments) {
         DataLoaderModel.Status loadStatus;
-        if (numberOfFIsAssigned == dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader()) {
+        if (numberOfAssignedFinancialInstruments == dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader()) {
             loadStatus = DataLoaderModel.Status.BALANCED;
-        } else if (numberOfFIsAssigned < dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader()) {
+        } else if (numberOfAssignedFinancialInstruments < dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader()) {
             loadStatus = DataLoaderModel.Status.TOO_LOW;
         } else {
             loadStatus = DataLoaderModel.Status.TOO_HIGH;
         }
-        dataLoader.setLoadStatus(loadStatus);
-        dataLoader.setLastInstantOfFinancialInstrumentsAssignment(timeService.getInstantUTC()); //updates time of handling, so other instances of this
-        // service can retrieve records with "oldest" lastInstantOfFinancialInstrumentsAssignment field in CheckReadyForHandlingStatus
-        log.debug("""
-                        Data Loader with id {} has {} Financial Instruments assigned to it and its load status is {}.
-                        Number of recommended financial instruments per data loader is {}.
-                        """,
-                dataLoader.getId(),
-                numberOfFIsAssigned,
-                loadStatus,
-                dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader());
-        dataLoaderService.update(dataLoader);
+        return loadStatus;
     }
 }

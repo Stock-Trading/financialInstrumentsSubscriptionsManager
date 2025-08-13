@@ -24,13 +24,13 @@ public class SchedulerService {
         checkActiveStateOfDataLoaderUseCase.checkActiveState();
     }
 
-        @Scheduled(fixedDelay = 4_000)
+    @Scheduled(fixedDelay = 4_000)
     void checkIfReadyForAssignmentOfFinancialInstruments() {
         log.debug("Running regular task of checking of Data Loaders readiness assignment of Financial Instruments");
         checkForReadinessOfDataLoaderForAssignmentOfFinancialInstrumentsUseCase.checkIfDataLoadersAreReadyForAssignmentOfFinancialInstruments();
     }
 
-    //    @Scheduled(fixedDelay = 5_000)
+    @Scheduled(fixedDelay = 5_000)
     void checkLoadStatus() {
         log.debug("Running regular Data Loaders load status check");
         checkDataLoaderLoadStatusUseCase.checkLoadStatus();

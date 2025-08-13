@@ -25,4 +25,6 @@ public interface FinancialInstrumentRepository {
     FinancialInstrumentModel attachDataLoaderById(FinancialInstrumentModel financialInstrumentModel, Long dataLoaderId);
 
     List<FinancialInstrumentModel> findByDataLoaderId(Long dataLoaderId);
+
+    Long findNumberOfFinancialInstrumentsAssignedToDataLoader(Long dataLoaderId);
 }

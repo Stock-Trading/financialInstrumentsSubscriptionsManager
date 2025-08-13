@@ -66,4 +66,9 @@ class FinancialInstrumentRepositoryImpl implements FinancialInstrumentRepository
                 .map(mapper::mapToFinancialInstrumentModel)
                 .toList();
     }
+
+    @Override
+    public Long findNumberOfFinancialInstrumentsAssignedToDataLoader(Long dataLoaderId) {
+        return jpaRepository.countByDataLoaderId(dataLoaderId);
+    }
 }
