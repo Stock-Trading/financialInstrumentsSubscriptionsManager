@@ -4,6 +4,7 @@ import jakarta.persistence.LockModeType;
 import jakarta.persistence.QueryHint;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
+import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
 import java.util.List;
@@ -40,6 +41,24 @@ interface DataLoaderJpaRepository extends JpaRepository<DataLoaderEntity, Long> 
     List<DataLoaderEntity> findByActiveAndLastConnectedOnLessThan(Boolean activeStatus,
                                                                   Instant lastConnectedOn,
                                                                   Pageable pageable);
+
+    @Modifying
+    @Query(value = """
+            UPDATE DataLoaderEntity dl
+            SET dl.active = :activeNewValue,
+                dl.loadStatus = :loadStatusNewValue,
+                dl.readyForAssignmentOfFinancialInstruments = :readyForAssignmentOfFinancialInstrumentsNewValue
+            WHERE
+                dl.active = :activeCurrentValue
+            AND
+                dl.lastConnectedOn < :lastConnectedOn
+            """)
+    Integer findByActiveAndLastConnectedOnLessThanAndUpdateLoadStatusAndActiveAndReadyForAssignmentOfFinancialInstruments(
+            @Param("activeNewValue") Boolean activeNewValue,
+            @Param("loadStatusNewValue") Boolean loadStatusNewValue,
+            @Param("readyForAssignmentOfFinancialInstrumentsNewValue") Boolean readyForAssignmentOfFinancialInstrumentsNewValue,
+            @Param("activeCurrentValue") Boolean activeCurrentValue,
+            @Param("lastConnectedOn") Instant lastConnectedOn);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @QueryHints(value = {

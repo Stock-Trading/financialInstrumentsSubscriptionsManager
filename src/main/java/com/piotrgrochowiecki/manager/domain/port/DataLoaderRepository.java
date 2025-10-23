@@ -3,7 +3,6 @@ package com.piotrgrochowiecki.manager.domain.port;
 import com.piotrgrochowiecki.manager.domain.model.DataLoaderModel;
 import org.springframework.stereotype.Repository;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
 
@@ -23,7 +22,7 @@ public interface DataLoaderRepository {
 
     Collection<DataLoaderModel> findActiveDataLoaders(OrderBy orderBy, int limit);
 
-    Collection<DataLoaderModel> findActiveDataLoadersAndLastConnectedEarlierThen(OrderBy orderBy, Instant lastConnectedThreshold, int limit);
+    Integer checkForInactiveDataLoadersAndUpdateTheirProperties(Instant lastConnectedOn);
 
     Collection<DataLoaderModel> findReadyForAssignmentOfFinancialInstruments(OrderBy orderBy, int limit);
 
