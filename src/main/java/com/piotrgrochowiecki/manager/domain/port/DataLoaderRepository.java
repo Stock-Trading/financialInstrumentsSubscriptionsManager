@@ -24,17 +24,15 @@ public interface DataLoaderRepository {
 
     Integer checkForInactiveDataLoadersAndUpdateTheirProperties(Instant lastConnectedOn);
 
-    Collection<DataLoaderModel> findReadyForAssignmentOfFinancialInstruments(OrderBy orderBy, int limit);
-
 //    Collection<DataLoaderModel> findActiveAndUnhandledDataLoaders(Duration timeFromLastConnectionAsHealthThreshold,
 //                                                                  Duration timeFromLastHandledTimeAsUnhandledThreshold,
 //                                                                  OrderBy orderBy,
 //                                                                  int limit);
 
-    Collection<DataLoaderModel> findBasedOnLoadStatusAndReadinessForAssignmentOfFinancialInstruments(DataLoaderModel.Status loadStatus,
-                                                                                                     boolean readyForAssignmentOfFinancialInstruments,
-                                                                                                     OrderBy orderBy,
-                                                                                                     int limit);
+    Collection<DataLoaderModel> findBasedOnLoadStatusAndActive(DataLoaderModel.Status loadStatus,
+                                                               boolean readyForAssignmentOfFinancialInstruments,
+                                                               OrderBy orderBy,
+                                                               int limit);
 
     boolean existsByUuid(String dataLoaderUUID);
 }

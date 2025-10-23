@@ -24,7 +24,6 @@ public class CheckInDataLoaderUseCase {
         DataLoaderModel dataLoaderModel = dataLoaderRepository.findByUuid(dataLoaderUuid);
         dataLoaderModel.setLastConnectedOn(timeService.getInstantUTC());
         dataLoaderModel.setActive(true);
-        dataLoaderModel.setReadyForAssignmentOfFinancialInstruments(true);
         return dataLoaderService.update(dataLoaderModel);
     }
 

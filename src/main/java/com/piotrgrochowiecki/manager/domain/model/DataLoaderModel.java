@@ -20,11 +20,6 @@ public class DataLoaderModel {
      * This status is set based on last connection time (lastConnectedOn) of the Data Loader
      */
     private Boolean active;
-    /**
-     * This status describes readiness state, with a slightly longer threshold compared to active flag,
-     * to ensure Data Loader is fully available for assignments of Financial Instruments.
-     */
-    private Boolean readyForAssignmentOfFinancialInstruments;
     private Status loadStatus;
     //TODO rozważyć dodanie liczby aktualnie przypisanych instrumentów, która jest na bieżąco aktualizowana
 

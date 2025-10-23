@@ -14,9 +14,6 @@ public class DataLoaderParametersProvider {
     @Value("${dataLoader.recommendedNumberOfFinancialInstrumentsPerDataLoader}")
     private int recommendedNumberOfFinancialInstrumentsPerDataLoader;
 
-    @Value("${dataLoader.readyForHandlingThreshold.millisecond}")
-    private int readyForHandlingThresholdMilliseconds;
-
     @Value("${dataLoader.numberOfDataLoadersHandledByManagerInOneReassignmentCycle}")
     private int numberOfDataLoadersHandledByManagerInOneCycle;
 

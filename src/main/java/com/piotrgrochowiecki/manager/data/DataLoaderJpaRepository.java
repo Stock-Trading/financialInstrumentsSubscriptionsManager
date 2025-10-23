@@ -46,31 +46,17 @@ interface DataLoaderJpaRepository extends JpaRepository<DataLoaderEntity, Long> 
     @Query(value = """
             UPDATE DataLoaderEntity dl
             SET dl.active = :activeNewValue,
-                dl.loadStatus = :loadStatusNewValue,
-                dl.readyForAssignmentOfFinancialInstruments = :readyForAssignmentOfFinancialInstrumentsNewValue
+                dl.loadStatus = :loadStatusNewValue
             WHERE
                 dl.active = :activeCurrentValue
             AND
                 dl.lastConnectedOn < :lastConnectedOn
             """)
-    Integer findByActiveAndLastConnectedOnLessThanAndUpdateLoadStatusAndActiveAndReadyForAssignmentOfFinancialInstruments(
+    Integer findByActiveAndLastConnectedOnLessThanAndUpdateLoadStatusAndActive(
             @Param("activeNewValue") Boolean activeNewValue,
             @Param("loadStatusNewValue") Boolean loadStatusNewValue,
-            @Param("readyForAssignmentOfFinancialInstrumentsNewValue") Boolean readyForAssignmentOfFinancialInstrumentsNewValue,
             @Param("activeCurrentValue") Boolean activeCurrentValue,
             @Param("lastConnectedOn") Instant lastConnectedOn);
-
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @QueryHints(value = {
-            @QueryHint(name = "jakarta.persistence.lock.timeout",
-                    value = "-2")
-    })
-    @Query(value = """
-            SELECT dl
-            FROM DataLoaderEntity dl
-            WHERE dl.readyForAssignmentOfFinancialInstruments = true
-            """)
-    List<DataLoaderEntity> findReadyForAssignmentOfFinancialInstruments(Pageable pageable);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @QueryHints(value = {
@@ -80,7 +66,7 @@ interface DataLoaderJpaRepository extends JpaRepository<DataLoaderEntity, Long> 
                                                                                                                        Instant firstHandledOn,
                                                                                                                        Pageable pageable);
 
-    List<DataLoaderEntity> findByLoadStatusAndReadyForAssignmentOfFinancialInstruments(String status,
-                                                                                       Boolean readyForAssignmentOfFinancialInstruments,
-                                                                                       Pageable pageable);
+    List<DataLoaderEntity> findByLoadStatusAndActive(String status,
+                                                     Boolean active,
+                                                     Pageable pageable);
 }

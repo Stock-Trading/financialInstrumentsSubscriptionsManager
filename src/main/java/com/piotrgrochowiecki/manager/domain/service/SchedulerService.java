@@ -14,7 +14,6 @@ public class SchedulerService {
     private final CheckActiveStateOfDataLoaderUseCase checkActiveStateOfDataLoaderUseCase;
     //    private final BalanceDataLoadersUseCase balanceDataLoadersUseCase;
     private final CheckDataLoaderLoadStatusUseCase checkDataLoaderLoadStatusUseCase;
-    private final CheckForReadinessOfDataLoaderForAssignmentOfFinancialInstrumentsUseCase checkForReadinessOfDataLoaderForAssignmentOfFinancialInstrumentsUseCase;
     private final AssignUnassignedFinancialInstrumentToDataLoadersUseCase assignUnassignedFinancialInstrumentToDataLoadersUseCase;
     private final UnassignFinancialInstrumentFromDataLoaderUseCase unassignFinancialInstrumentFromDataLoaderUseCase;
 

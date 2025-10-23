@@ -26,8 +26,6 @@ class DataLoaderEntity {
     Instant lastInstantOfFinancialInstrumentsAssignment;
     @Column(name = "active", nullable = false)
     Boolean active;
-    @Column(name = "ready_for_assignment_of_financial_instruments", nullable = false)
-    Boolean readyForAssignmentOfFinancialInstruments;
     @Column(name = "load_status")
     String loadStatus;
 }

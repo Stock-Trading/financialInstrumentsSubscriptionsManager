@@ -29,7 +29,6 @@ public class RegisterDataLoaderUseCase {
                 .lastConnectedOn(timeService.getInstantUTC())
                 .active(true)
                 .loadStatus(DataLoaderModel.Status.TOO_LOW)
-                .readyForAssignmentOfFinancialInstruments(true)
                 .build();
         return dataLoaderRepository.save(dataLoaderModel);
     }

@@ -55,33 +55,23 @@ public class DataLoaderRepositoryImpl implements DataLoaderRepository {
 
     @Override
     public Integer checkForInactiveDataLoadersAndUpdateTheirProperties(Instant lastConnectedOn) {
-        return jpaRepository.findByActiveAndLastConnectedOnLessThanAndUpdateLoadStatusAndActiveAndReadyForAssignmentOfFinancialInstruments(
+        return jpaRepository.findByActiveAndLastConnectedOnLessThanAndUpdateLoadStatusAndActive(
                 false,
                 null,
-                false,
                 true,
                 lastConnectedOn);
     }
 
-    public Collection<DataLoaderModel> findReadyForAssignmentOfFinancialInstruments(OrderBy orderBy, int limit) {
-        Sort sort = mapper.mapToSort(orderBy);
-        Pageable pageable = PageRequest.of(0, limit, sort);
-        return jpaRepository.findReadyForAssignmentOfFinancialInstruments(pageable)
-                .stream()
-                .map(mapper::mapToDataLoaderModel)
-                .toList();
-    }
-
     @Override
-    public Collection<DataLoaderModel> findBasedOnLoadStatusAndReadinessForAssignmentOfFinancialInstruments(DataLoaderModel.Status loadStatus,
-                                                                                                            boolean readyForAssignmentOfFinancialInstruments,
-                                                                                                            OrderBy orderBy,
-                                                                                                            int limit) {
+    public Collection<DataLoaderModel> findBasedOnLoadStatusAndActive(DataLoaderModel.Status loadStatus,
+                                                                      boolean active,
+                                                                      OrderBy orderBy,
+                                                                      int limit) {
         Sort sort = mapper.mapToSort(OrderBy.LAST_INSTANT_OF_FINANCIAL_INSTRUMENTS_ASSIGNMENT_ASC);
         Pageable pageable = PageRequest.of(0, limit, sort);
         String loadStatusStr = loadStatus.getDbValue();
-        return jpaRepository.findByLoadStatusAndReadyForAssignmentOfFinancialInstruments(loadStatusStr,
-                        readyForAssignmentOfFinancialInstruments,
+        return jpaRepository.findByLoadStatusAndActive(loadStatusStr,
+                        active,
                         pageable)
                 .stream()
                 .map(mapper::mapToDataLoaderModel)
