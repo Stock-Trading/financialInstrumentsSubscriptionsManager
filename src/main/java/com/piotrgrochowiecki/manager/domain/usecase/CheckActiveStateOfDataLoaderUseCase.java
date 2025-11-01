@@ -22,15 +22,14 @@ public class CheckActiveStateOfDataLoaderUseCase {
 
     /**
      * Checks for last check-in time of DataLoader. If that time is longer then specified threshold,
-     * unassigns all Financial Instrument from it and sets its Active and ReadyForFinancialInstrumentsAssignment
-     * properties to false.
+     * unassigns all Financial Instrument from it and sets its Active property to false.
      */
     @Transactional
     public void checkActiveState() {
         Instant lastInstantCountingAsActive = timeService.getInstantUTC()
                 .minus(Duration.ofMillis(dataLoaderParametersProvider.getActiveThresholdMilliseconds()));
 
-        Integer numberOfUpdatedModels = dataLoaderRepository.checkForInactiveDataLoadersAndUpdateTheirProperties(
+        Integer numberOfUpdatedModels = dataLoaderRepository.setActiveToFalseAndLoadStatusToNullOfInactiveDataLoaders(
                 lastInstantCountingAsActive);
 
         log.debug("Number of updated data loaders: {}", numberOfUpdatedModels);

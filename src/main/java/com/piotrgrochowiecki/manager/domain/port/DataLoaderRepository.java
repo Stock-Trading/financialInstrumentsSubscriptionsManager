@@ -22,7 +22,7 @@ public interface DataLoaderRepository {
 
     Collection<DataLoaderModel> findActiveDataLoaders(OrderBy orderBy, int limit);
 
-    Integer checkForInactiveDataLoadersAndUpdateTheirProperties(Instant lastConnectedOn);
+    Integer setActiveToFalseAndLoadStatusToNullOfInactiveDataLoaders(Instant lastConnectedOn);
 
 //    Collection<DataLoaderModel> findActiveAndUnhandledDataLoaders(Duration timeFromLastConnectionAsHealthThreshold,
 //                                                                  Duration timeFromLastHandledTimeAsUnhandledThreshold,

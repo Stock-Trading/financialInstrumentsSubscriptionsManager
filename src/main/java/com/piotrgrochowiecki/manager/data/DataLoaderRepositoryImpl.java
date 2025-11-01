@@ -53,13 +53,16 @@ public class DataLoaderRepositoryImpl implements DataLoaderRepository {
                 .toList();
     }
 
+    /**
+     * Sets <i>Active</i> flag to <b>false</b> and <i>LoadStatus</i> to <b>null</b> of DataLoaders that are active (=true),
+     * but they have not connected to the service in specified threshold.
+     *
+     * @param lastConnectedOn Instant of last time when Data Loader connected to the service
+     * @return number of updated rows
+     */
     @Override
-    public Integer checkForInactiveDataLoadersAndUpdateTheirProperties(Instant lastConnectedOn) {
-        return jpaRepository.findByActiveAndLastConnectedOnLessThanAndUpdateLoadStatusAndActive(
-                false,
-                null,
-                true,
-                lastConnectedOn);
+    public Integer setActiveToFalseAndLoadStatusToNullOfInactiveDataLoaders(Instant lastConnectedOn) {
+        return jpaRepository.setActiveToFalseAndLoadStatusToNullOfInactiveDataLoaders(lastConnectedOn);
     }
 
     @Override

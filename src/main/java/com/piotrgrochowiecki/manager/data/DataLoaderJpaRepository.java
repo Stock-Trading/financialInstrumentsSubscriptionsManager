@@ -42,20 +42,25 @@ interface DataLoaderJpaRepository extends JpaRepository<DataLoaderEntity, Long> 
                                                                   Instant lastConnectedOn,
                                                                   Pageable pageable);
 
-    @Modifying
+    /**
+     * Sets <i>Active</i> flag to <b>false</b> and <i>LoadStatus</i> to <b>null</b> of DataLoaders that are active (=true),
+     * but they have not connected to the service in specified threshold.
+     *
+     * @param lastConnectedOn Instant of last time when Data Loader connected to the service
+     * @return number of updated rows
+     */
+    @Modifying(flushAutomatically = true,
+            clearAutomatically = true)
     @Query(value = """
             UPDATE DataLoaderEntity dl
-            SET dl.active = :activeNewValue,
-                dl.loadStatus = :loadStatusNewValue
+            SET dl.active = false,
+                dl.loadStatus = null
             WHERE
-                dl.active = :activeCurrentValue
+                dl.active = true
             AND
                 dl.lastConnectedOn < :lastConnectedOn
             """)
-    Integer findByActiveAndLastConnectedOnLessThanAndUpdateLoadStatusAndActive(
-            @Param("activeNewValue") Boolean activeNewValue,
-            @Param("loadStatusNewValue") Boolean loadStatusNewValue,
-            @Param("activeCurrentValue") Boolean activeCurrentValue,
+    Integer setActiveToFalseAndLoadStatusToNullOfInactiveDataLoaders(
             @Param("lastConnectedOn") Instant lastConnectedOn);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
