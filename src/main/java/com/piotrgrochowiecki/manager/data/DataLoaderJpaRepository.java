@@ -54,7 +54,8 @@ interface DataLoaderJpaRepository extends JpaRepository<DataLoaderEntity, Long> 
     @Query(value = """
             UPDATE DataLoaderEntity dl
             SET dl.active = false,
-                dl.loadStatus = null
+                dl.loadStatus = null,
+                dl.lastLoadStatusUpdate = CURRENT_TIMESTAMP
             WHERE
                 dl.active = true
             AND

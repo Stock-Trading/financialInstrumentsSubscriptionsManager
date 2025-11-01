@@ -28,4 +28,6 @@ class DataLoaderEntity {
     Boolean active;
     @Column(name = "load_status")
     String loadStatus;
+    @Column(name = "last_load_status_update")
+    Instant lastLoadStatusUpdate;
 }

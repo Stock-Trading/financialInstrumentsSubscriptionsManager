@@ -26,28 +26,29 @@ public class CheckDataLoaderLoadStatusUseCase {
 
     @Transactional
     public void checkLoadStatus() {
-        log.debug("Retrieving Data Loaders to check their load status");
+        log.info("Retrieving Data Loaders to check their load status");
         List<DataLoaderModel> dataLoaderModelList = dataLoaderRepository.findActiveDataLoaders(
-                        DataLoaderRepository.OrderBy.LAST_CONNECTED_ON_ASC,
+                        DataLoaderRepository.OrderBy.LAST_LOAD_STATUS_UPDATE_ASC,
                         dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader())
                 .stream()
                 .toList();
-        log.debug("List of Data Loaders contains {} objects", dataLoaderModelList.size());
+        log.info("List of Data Loaders contains {} objects", dataLoaderModelList.size());
         dataLoaderModelList.forEach(this::checkAndUpdateLoadStatus);
     }
 
     private void checkAndUpdateLoadStatus(DataLoaderModel dataLoader) {
-        log.debug("Checking load status of dataLoader {}", dataLoader.toString());
+        log.info("Checking load status of dataLoader {}", dataLoader.toString());
         long numberOfAssignedFinancialInstruments = financialInstrumentRepository.findNumberOfFinancialInstrumentsAssignedToDataLoader(
                 dataLoader.getId());
-        log.debug("Number of assigned Financial Instruments: {}", numberOfAssignedFinancialInstruments);
+        log.info("Number of assigned Financial Instruments: {}", numberOfAssignedFinancialInstruments);
         DataLoaderModel.Status loadStatus = getStatus(numberOfAssignedFinancialInstruments);
         dataLoader.setLoadStatus(loadStatus);
-        dataLoader.setLastInstantOfFinancialInstrumentsAssignment(timeService.getInstantUTC()); //updates time of last time
-        // assignment of Financial Instruments, so other instances of this service can retrieve records with "oldest"
-        // lastInstantOfFinancialInstrumentsAssignment field in CheckForReadinessOfDataLoaderForAssignmentOfFinancialInstrumentsUseCase
+        dataLoader.setLastLoadStatusUpdate(timeService.getInstantUTC()); //updates time of last time
+        // of Load Status flag update, so other instances of this service can retrieve records with "oldest"
+        // lastLoadStatusUpdate
         log.debug("""
-                        Data Loader with id {}, uuid {} has {} Financial Instruments assigned to it and its load status is {}. Number of recommended Financial Instruments per Data Loader is {}.
+                        Data Loader with id {}, uuid {} has {} Financial Instruments assigned to it and its load status is {}.
+                        Number of recommended Financial Instruments per Data Loader is {}.
                         """,
                 dataLoader.getId(),
                 dataLoader.getUuid(),
@@ -68,4 +69,5 @@ public class CheckDataLoaderLoadStatusUseCase {
         }
         return loadStatus;
     }
+
 }

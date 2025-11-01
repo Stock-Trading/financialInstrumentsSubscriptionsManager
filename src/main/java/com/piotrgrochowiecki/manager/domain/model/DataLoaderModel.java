@@ -21,7 +21,7 @@ public class DataLoaderModel {
      */
     private Boolean active;
     private Status loadStatus;
-    //TODO rozważyć dodanie liczby aktualnie przypisanych instrumentów, która jest na bieżąco aktualizowana
+    private Instant lastLoadStatusUpdate;
 
     @Getter
     @RequiredArgsConstructor

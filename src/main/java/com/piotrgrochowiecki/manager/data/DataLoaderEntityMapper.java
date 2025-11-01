@@ -21,6 +21,7 @@ class DataLoaderEntityMapper {
                 .loadStatus(Optional.ofNullable(entity.getLoadStatus())
                         .map(DataLoaderModel.Status::getStatusByDbValue)
                         .orElse(null))
+                .lastLoadStatusUpdate(entity.getLastLoadStatusUpdate())
                 .active(entity.getActive())
                 .build();
     }
@@ -35,29 +36,40 @@ class DataLoaderEntityMapper {
                 .loadStatus(Optional.ofNullable(model.getLoadStatus())
                         .map(DataLoaderModel.Status::getDbValue)
                         .orElse(null))
+                .lastLoadStatusUpdate(model.getLastLoadStatusUpdate())
                 .build();
     }
 
     Sort mapToSort(DataLoaderRepository.OrderBy orderBy) {
         switch (orderBy) {
-            case DataLoaderRepository.OrderBy.LAST_CONNECTED_ON_ASC -> {
+            case LAST_CONNECTED_ON_ASC -> {
                 return Sort.sort(DataLoaderEntity.class)
                         .by(DataLoaderEntity::getLastConnectedOn)
                         .ascending();
             }
-            case DataLoaderRepository.OrderBy.LAST_CONNECTED_ON_DESC -> {
+            case LAST_CONNECTED_ON_DESC -> {
                 return Sort.sort(DataLoaderEntity.class)
                         .by(DataLoaderEntity::getLastConnectedOn)
                         .descending();
             }
-            case DataLoaderRepository.OrderBy.LAST_INSTANT_OF_FINANCIAL_INSTRUMENTS_ASSIGNMENT_ASC -> {
+            case LAST_INSTANT_OF_FINANCIAL_INSTRUMENTS_ASSIGNMENT_ASC -> {
                 return Sort.sort(DataLoaderEntity.class)
                         .by(DataLoaderEntity::getLastInstantOfFinancialInstrumentsAssignment)
                         .ascending();
             }
-            case DataLoaderRepository.OrderBy.LAST_INSTANT_OF_FINANCIAL_INSTRUMENTS_ASSIGNMENT_DESC -> {
+            case LAST_INSTANT_OF_FINANCIAL_INSTRUMENTS_ASSIGNMENT_DESC -> {
                 return Sort.sort(DataLoaderEntity.class)
                         .by(DataLoaderEntity::getLastInstantOfFinancialInstrumentsAssignment)
+                        .descending();
+            }
+            case LAST_LOAD_STATUS_UPDATE_ASC -> {
+                return Sort.sort(DataLoaderEntity.class)
+                        .by(DataLoaderEntity::getLastLoadStatusUpdate)
+                        .ascending();
+            }
+            case LAST_LOAD_STATUS_UPDATE_DESC -> {
+                return Sort.sort(DataLoaderEntity.class)
+                        .by(DataLoaderEntity::getLastLoadStatusUpdate)
                         .descending();
             }
             default -> throw new IllegalArgumentException("Unknown enum " + orderBy.name());
