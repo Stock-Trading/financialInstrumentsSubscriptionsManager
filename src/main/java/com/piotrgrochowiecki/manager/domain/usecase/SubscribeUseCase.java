@@ -23,11 +23,12 @@ public class SubscribeUseCase {
     @Transactional
     public SubscriptionModel subscribe(String dataLoaderUUID) {
         DataLoaderModel dataLoaderModel = dataLoaderRepository.findByUuid(dataLoaderUUID);
-        List<FinancialInstrumentModel> financialInstrumentModelList = financialInstrumentRepository.findByDataLoaderId(dataLoaderModel.getId())
+        List<FinancialInstrumentModel> financialInstrumentModelList = financialInstrumentRepository.findByDataLoaderId(
+                        dataLoaderModel.getId())
                 .stream()
                 .toList();
-        log.debug("Obtaining subscription for Data loader with uuid {}. " +
-                "List of Financial Instruments to subscribe: {}",
+        log.info("Obtaining subscription for Data loader with uuid {}. " +
+                        "List of Financial Instruments to subscribe: {}",
                 dataLoaderUUID,
                 financialInstrumentModelList);
         return SubscriptionModel.builder()
