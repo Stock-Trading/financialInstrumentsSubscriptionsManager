@@ -66,10 +66,10 @@ public class DataLoaderRepositoryImpl implements DataLoaderRepository {
     }
 
     @Override
-    public Collection<DataLoaderModel> findBasedOnLoadStatusAndActive(DataLoaderModel.Status loadStatus,
-                                                                      boolean active,
-                                                                      OrderBy orderBy,
-                                                                      int limit) {
+    public Collection<DataLoaderModel> findByLoadStatusAndActive(DataLoaderModel.Status loadStatus,
+                                                                 boolean active,
+                                                                 OrderBy orderBy,
+                                                                 int limit) {
         Sort sort = mapper.mapToSort(OrderBy.LAST_INSTANT_OF_FINANCIAL_INSTRUMENTS_ASSIGNMENT_ASC);
         Pageable pageable = PageRequest.of(0, limit, sort);
         String loadStatusStr = loadStatus.getDbValue();
@@ -80,6 +80,22 @@ public class DataLoaderRepositoryImpl implements DataLoaderRepository {
                 .map(mapper::mapToDataLoaderModel)
                 .toList();
     }
+
+    @Override
+    public Collection<Long> findIdByLoadStatusAndActive(DataLoaderModel.Status loadStatus,
+                                                        boolean active,
+                                                        OrderBy orderBy,
+                                                        int limit) {
+        Sort sort = mapper.mapToSort(OrderBy.LAST_INSTANT_OF_FINANCIAL_INSTRUMENTS_ASSIGNMENT_ASC);
+        Pageable pageable = PageRequest.of(0, limit, sort);
+        String loadStatusStr = loadStatus.getDbValue();
+        return jpaRepository.findIdByLoadStatusAndActive(loadStatusStr,
+                        active,
+                        pageable)
+                .stream()
+                .toList();
+    }
+
 
     @Override
     public boolean existsByUuid(String dataLoaderUUUID) {

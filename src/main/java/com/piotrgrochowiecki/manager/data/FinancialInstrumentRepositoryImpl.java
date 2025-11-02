@@ -44,11 +44,8 @@ class FinancialInstrumentRepositoryImpl implements FinancialInstrumentRepository
     }
 
     @Override
-    public FinancialInstrumentModel detachDataLoader(FinancialInstrumentModel financialInstrumentModel) {
-        financialInstrumentModel.setDataLoaderId(null);
-        FinancialInstrumentEntity entityToBeSaved = mapper.mapToFinancialInstrumentEntity(financialInstrumentModel);
-        FinancialInstrumentEntity savedEntity = jpaRepository.save(entityToBeSaved);
-        return mapper.mapToFinancialInstrumentModel(savedEntity);
+    public int detachDataLoaderBasedOnIds(List<Long> listOfFinancialInstrumentModelIds) {
+        return jpaRepository.detachDataLoadersBasedOnIds(listOfFinancialInstrumentModelIds);
     }
 
     @Override

@@ -75,4 +75,18 @@ interface DataLoaderJpaRepository extends JpaRepository<DataLoaderEntity, Long> 
     List<DataLoaderEntity> findByLoadStatusAndActive(String status,
                                                      Boolean active,
                                                      Pageable pageable);
+
+    @Query(value = """
+            SELECT
+                dl.id
+            FROM
+                DataLoaderEntity dl
+            WHERE
+                dl.active = :active
+            AND
+                dl.loadStatus = :status
+            """)
+    List<Long> findIdByLoadStatusAndActive(@Param("status") String status,
+                                           @Param("active") Boolean active,
+                                           Pageable pageable);
 }

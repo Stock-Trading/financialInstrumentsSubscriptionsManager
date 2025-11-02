@@ -3,9 +3,8 @@ package com.piotrgrochowiecki.manager.data;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.QueryHint;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Lock;
-import org.springframework.data.jpa.repository.QueryHints;
+import org.springframework.data.jpa.repository.*;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -23,4 +22,13 @@ interface FinancialInstrumentJpaRepository extends JpaRepository<FinancialInstru
     List<FinancialInstrumentEntity> findByDataLoaderId(Long dataLoaderId);
 
     Long countByDataLoaderId(Long dataLoaderId);
+
+    @Modifying(flushAutomatically = true,
+            clearAutomatically = true)
+    @Query("""
+            UPDATE FinancialInstrumentEntity fi
+            SET fi.dataLoaderId = null
+            WHERE fi.id IN :ids
+            """)
+    int detachDataLoadersBasedOnIds(@Param("ids") List<Long> ids);
 }

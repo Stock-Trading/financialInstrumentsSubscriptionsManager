@@ -31,10 +31,15 @@ public interface DataLoaderRepository {
 //                                                                  OrderBy orderBy,
 //                                                                  int limit);
 
-    Collection<DataLoaderModel> findBasedOnLoadStatusAndActive(DataLoaderModel.Status loadStatus,
-                                                               boolean readyForAssignmentOfFinancialInstruments,
-                                                               OrderBy orderBy,
-                                                               int limit);
+    Collection<DataLoaderModel> findByLoadStatusAndActive(DataLoaderModel.Status loadStatus,
+                                                          boolean active,
+                                                          OrderBy orderBy,
+                                                          int limit);
+
+    Collection<Long> findIdByLoadStatusAndActive(DataLoaderModel.Status loadStatus,
+                                                    boolean active,
+                                                    OrderBy orderBy,
+                                                    int limit);
 
     boolean existsByUuid(String dataLoaderUUID);
 }

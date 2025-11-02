@@ -20,7 +20,7 @@ public interface FinancialInstrumentRepository {
 
     boolean existsWithNoDataLoaderAssigned();
 
-    FinancialInstrumentModel detachDataLoader(FinancialInstrumentModel financialInstrumentModel);
+    int detachDataLoaderBasedOnIds(List<Long> listOfFinancialInstrumentModelIds);
 
     FinancialInstrumentModel attachDataLoaderById(FinancialInstrumentModel financialInstrumentModel, Long dataLoaderId);
 
