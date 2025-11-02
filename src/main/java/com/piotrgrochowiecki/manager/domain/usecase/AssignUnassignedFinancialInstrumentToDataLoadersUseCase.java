@@ -39,7 +39,7 @@ public class AssignUnassignedFinancialInstrumentToDataLoadersUseCase {
         List<DataLoaderModel> dataLoadersReadyForAssignmentOfFinancialInstruments = new LinkedList<>(
                 dataLoaderRepository.findActiveDataLoaders(
                         DataLoaderRepository.OrderBy.LAST_CONNECTED_ON_ASC,
-                        dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader()));
+                        dataLoaderParametersProvider.getNumberOfDataLoadersHandledByManagerInOneCycle()));
         assignFIsToDLs(unassignedFIs, dataLoadersReadyForAssignmentOfFinancialInstruments);
     }
 

@@ -29,7 +29,7 @@ public class SchedulerService {
         checkDataLoaderLoadStatusUseCase.checkLoadStatus();
     }
 
-    //    @Scheduled(fixedDelay = 10_000)
+    @Scheduled(fixedDelay = 10_000)
     public void assignUnassignedInstrumentsToActiveDataLoaders() {
         log.debug("Running regular task of assigning unassigned Financial Instruments to active Data Loaders");
         assignUnassignedFinancialInstrumentToDataLoadersUseCase.assignUnassignedInstrumentsToActiveDataLoaders();
