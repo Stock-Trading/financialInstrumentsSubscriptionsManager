@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 public class SchedulerService {
 
     private final CheckActiveStateOfDataLoaderUseCase checkActiveStateOfDataLoaderUseCase;
-    //    private final BalanceDataLoadersUseCase balanceDataLoadersUseCase;
     private final CheckDataLoaderLoadStatusUseCase checkDataLoaderLoadStatusUseCase;
     private final AssignUnassignedFinancialInstrumentToDataLoadersUseCase assignUnassignedFinancialInstrumentToDataLoadersUseCase;
     private final UnassignFinancialInstrumentFromDataLoaderUseCase unassignFinancialInstrumentFromDataLoaderUseCase;
@@ -35,14 +34,10 @@ public class SchedulerService {
         assignUnassignedFinancialInstrumentToDataLoadersUseCase.assignUnassignedInstrumentsToActiveDataLoaders();
     }
 
-        @Scheduled(fixedDelay = 12_000) //TODO rozważyć zmniejszenie częstotliwości
+    @Scheduled(fixedDelay = 12_000)
     public void unassignFinancialInstrumentsFromDataLoadersWithTooHighLoadStatus() {
         log.debug("Running regular task of unassigning Financial Instruments from Data Loaders with too high load status");
         unassignFinancialInstrumentFromDataLoaderUseCase.unassignFinancialInstrumentsFromDataLoaderWithTooHighLoadStatus();
     }
-//    @Scheduled(fixedDelay = 17_500)
-//    void balanceDataLoaders() {
-//        log.debug("Running regular task of re-balancing Financial Instruments assigned to Data Loaders");
-//        balanceDataLoadersUseCase.balanceDataLoaders();
-//    }
+
 }
