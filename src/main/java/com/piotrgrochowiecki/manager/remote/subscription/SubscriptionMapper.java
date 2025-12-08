@@ -1,4 +1,4 @@
-package com.piotrgrochowiecki.manager.remote;
+package com.piotrgrochowiecki.manager.remote.subscription;
 
 import com.piotrgrochowiecki.manager.domain.model.SubscriptionModel;
 import lombok.RequiredArgsConstructor;

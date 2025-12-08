@@ -1,4 +1,4 @@
-package com.piotrgrochowiecki.manager.remote;
+package com.piotrgrochowiecki.manager.remote.subscription;
 
 import lombok.Builder;
 

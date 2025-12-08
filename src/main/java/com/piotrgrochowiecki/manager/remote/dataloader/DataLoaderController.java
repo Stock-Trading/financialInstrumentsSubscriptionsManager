@@ -1,4 +1,4 @@
-package com.piotrgrochowiecki.manager.remote;
+package com.piotrgrochowiecki.manager.remote.dataloader;
 
 import com.piotrgrochowiecki.manager.domain.model.DataLoaderModel;
 import com.piotrgrochowiecki.manager.domain.usecase.CheckInDataLoaderUseCase;

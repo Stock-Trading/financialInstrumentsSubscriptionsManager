@@ -1,4 +1,4 @@
-package com.piotrgrochowiecki.manager.remote;
+package com.piotrgrochowiecki.manager.remote.dataloader;
 
 import com.piotrgrochowiecki.manager.domain.model.DataLoaderModel;
 import org.springframework.stereotype.Component;
