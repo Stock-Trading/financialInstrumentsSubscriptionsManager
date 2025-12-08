@@ -1,4 +1,4 @@
-package com.piotrgrochowiecki.manager.data;
+package com.piotrgrochowiecki.manager.data.financialinstrument;
 
 import com.piotrgrochowiecki.manager.domain.model.FinancialInstrumentModel;
 import com.piotrgrochowiecki.manager.domain.port.FinancialInstrumentRepository;

@@ -1,4 +1,4 @@
-package com.piotrgrochowiecki.manager.data;
+package com.piotrgrochowiecki.manager.data.dataloader;
 
 import jakarta.persistence.*;
 import lombok.*;

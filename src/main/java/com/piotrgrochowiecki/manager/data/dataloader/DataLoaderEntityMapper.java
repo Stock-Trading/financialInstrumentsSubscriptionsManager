@@ -1,4 +1,4 @@
-package com.piotrgrochowiecki.manager.data;
+package com.piotrgrochowiecki.manager.data.dataloader;
 
 import com.piotrgrochowiecki.manager.domain.model.DataLoaderModel;
 import com.piotrgrochowiecki.manager.domain.port.DataLoaderRepository;

@@ -1,4 +1,4 @@
-package com.piotrgrochowiecki.manager.data;
+package com.piotrgrochowiecki.manager.data.financialinstrument;
 
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.QueryHint;

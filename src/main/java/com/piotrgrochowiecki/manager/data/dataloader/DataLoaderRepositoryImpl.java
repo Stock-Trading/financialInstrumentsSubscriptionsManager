@@ -1,9 +1,8 @@
-package com.piotrgrochowiecki.manager.data;
+package com.piotrgrochowiecki.manager.data.dataloader;
 
 import com.piotrgrochowiecki.manager.domain.exception.NotFoundException;
 import com.piotrgrochowiecki.manager.domain.model.DataLoaderModel;
 import com.piotrgrochowiecki.manager.domain.port.DataLoaderRepository;
-import com.piotrgrochowiecki.manager.domain.service.TimeService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.PageRequest;
@@ -20,11 +19,10 @@ import java.util.Optional;
 @Repository
 @AllArgsConstructor
 @Log4j2
-public class DataLoaderRepositoryImpl implements DataLoaderRepository {
+class DataLoaderRepositoryImpl implements DataLoaderRepository {
 
     private final DataLoaderJpaRepository jpaRepository;
     private final DataLoaderEntityMapper mapper;
-    private final TimeService timeService;
 
     @Override
     @Transactional
