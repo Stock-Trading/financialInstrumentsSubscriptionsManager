@@ -1,15 +1,13 @@
 package com.piotrgrochowiecki.manager.domain.model;
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.lang.Nullable;
 
 @Builder
 @Getter
 @Setter
 @EqualsAndHashCode(of = "id")
+@ToString
 public class FinancialInstrumentModel {
 
     private Long id;
@@ -24,4 +22,5 @@ public class FinancialInstrumentModel {
         this.symbol = symbol;
         this.dataLoaderId = dataLoaderId;
     }
+
 }
