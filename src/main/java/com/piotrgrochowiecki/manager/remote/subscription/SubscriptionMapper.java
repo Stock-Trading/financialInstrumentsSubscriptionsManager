@@ -13,9 +13,11 @@ class SubscriptionMapper {
     SubscriptionResponseDto mapToDto(SubscriptionModel model) {
         return SubscriptionResponseDto.builder()
                 .dataLoaderUuid(model.getDataLoaderUUID())
-                .financialInstrumentResponseDtoList(model.getFinancialInstrumentModelCollection().stream()
+                .financialInstrumentResponseDtoList(model.getFinancialInstrumentModelCollection()
+                        .stream()
                         .map(apiMapper::mapToDto)
                         .toList())
                 .build();
     }
+
 }
