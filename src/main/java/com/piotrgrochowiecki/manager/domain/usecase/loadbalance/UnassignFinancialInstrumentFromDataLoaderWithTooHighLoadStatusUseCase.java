@@ -1,4 +1,4 @@
-package com.piotrgrochowiecki.manager.domain.usecase;
+package com.piotrgrochowiecki.manager.domain.usecase.loadbalance;
 
 import com.piotrgrochowiecki.manager.domain.component.DataLoaderParametersProvider;
 import com.piotrgrochowiecki.manager.domain.model.DataLoaderModel;
@@ -16,7 +16,7 @@ import java.util.List;
 @Log4j2
 @Component
 @RequiredArgsConstructor
-public class UnassignFinancialInstrumentFromDataLoaderUseCase {
+public class UnassignFinancialInstrumentFromDataLoaderWithTooHighLoadStatusUseCase {
 
     private final DataLoaderRepository dataLoaderRepository;
     private final FinancialInstrumentRepository financialInstrumentRepository;
@@ -24,7 +24,6 @@ public class UnassignFinancialInstrumentFromDataLoaderUseCase {
 
     @Transactional
     public void unassignFinancialInstrumentsFromDataLoaderWithTooHighLoadStatus() {
-        //TODO dodać timestamp wykonania tej operacji
         log.info("Retrieving IDs of Data Loaders with Too High status and Active flag set to true");
         List<Long> idsOfDataLoadersWithTooHighBalance = dataLoaderRepository.findIdByLoadStatusAndActive(
                         DataLoaderModel.Status.TOO_HIGH,
@@ -33,7 +32,8 @@ public class UnassignFinancialInstrumentFromDataLoaderUseCase {
                         dataLoaderParametersProvider.getNumberOfDataLoadersHandledByManagerInOneCycle())
                 .stream()
                 .toList();
-        log.debug("Ids of Data Loaders with load status Too High: {}", Arrays.toString(idsOfDataLoadersWithTooHighBalance.toArray()));
+        log.debug("Ids of Data Loaders with load status Too High and Active flag set to true: {}",
+                Arrays.toString(idsOfDataLoadersWithTooHighBalance.toArray()));
         for (Long id : idsOfDataLoadersWithTooHighBalance) {
             unassignFinancialInstrumentsFromDataLoader(id);
         }
@@ -41,11 +41,16 @@ public class UnassignFinancialInstrumentFromDataLoaderUseCase {
 
     private void unassignFinancialInstrumentsFromDataLoader(Long idOfDataLoader) {
         log.debug("Unassigning excessive Financial Instruments from Data Loader with id {}", idOfDataLoader);
-        List<FinancialInstrumentModel> financialInstrumentModels = financialInstrumentRepository.findByDataLoaderId(idOfDataLoader);
-        log.debug("Number of Financial Instruments assigned to Data Loader id={} is {}", idOfDataLoader, financialInstrumentModels.size());
+        List<FinancialInstrumentModel> financialInstrumentModels =
+                financialInstrumentRepository.findByDataLoaderId(idOfDataLoader);
+        log.debug("Number of Financial Instruments assigned to Data Loader id={} is {}",
+                idOfDataLoader, financialInstrumentModels.size());
+
         //don't unassign more FIs from DL than needed:
-        int numberOfFinancialInstrumentsToSkip = dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader();
-        log.debug("Recommended number of Financial Instruments per Data Loader is set to {}", numberOfFinancialInstrumentsToSkip);
+        int numberOfFinancialInstrumentsToSkip =
+                dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader();
+        log.debug("Recommended number of Financial Instruments per Data Loader is set to {}",
+                numberOfFinancialInstrumentsToSkip);
         List<Long> financialInstrumentModelsIdsToNullifyDataLoaders = financialInstrumentModels.stream()
                 .skip(numberOfFinancialInstrumentsToSkip)
                 .map(FinancialInstrumentModel::getId)
@@ -53,7 +58,10 @@ public class UnassignFinancialInstrumentFromDataLoaderUseCase {
         log.debug("Unassigning Financial Instruments with ids={} from Data Loader id={}",
                 financialInstrumentModelsIdsToNullifyDataLoaders.toArray(),
                 idOfDataLoader);
-        int numberOfAffectedRows = financialInstrumentRepository.detachDataLoaderBasedOnIds(financialInstrumentModelsIdsToNullifyDataLoaders);
-        log.debug("Unassigned Data Loader (id={}) from {} Financial Instruments", idOfDataLoader, numberOfAffectedRows);
+        int numberOfAffectedRows =
+                financialInstrumentRepository.detachDataLoaderBasedOnIds(financialInstrumentModelsIdsToNullifyDataLoaders);
+        log.debug("Unassigned Data Loader (id={}) from {} Financial Instruments",
+                idOfDataLoader, numberOfAffectedRows);
     }
+
 }

@@ -29,9 +29,26 @@ interface DataLoaderJpaRepository extends JpaRepository<DataLoaderEntity, Long> 
     @Query(value = """
             SELECT dl
             FROM DataLoaderEntity dl
-            WHERE dl.active = true
+            WHERE dl.active = :active
             """)
-    List<DataLoaderEntity> findAllActive(Pageable pageable);
+    List<DataLoaderEntity> findByActiveStatus(@Param("active") Boolean active,
+                                              Pageable pageable);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @QueryHints(value = {
+            @QueryHint(name = "jakarta.persistence.lock.timeout",
+                    value = "-2")
+    })
+    @Query(value = """
+            SELECT dl
+            FROM DataLoaderEntity dl
+            WHERE dl.active = true
+            AND (dl.loadStatus IN :allowedStatuses
+                         OR dl.loadStatus IS NULL)
+            """)
+    List<DataLoaderEntity> findActiveDataLoadersWithAllowedStatuses(
+            @Param("allowedStatuses") java.util.List<String> allowedStatuses,
+            Pageable pageable);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @QueryHints(value = {

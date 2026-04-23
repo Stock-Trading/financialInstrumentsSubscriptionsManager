@@ -1,10 +1,10 @@
-package com.piotrgrochowiecki.manager.domain.usecase;
+package com.piotrgrochowiecki.manager.domain.usecase.loadbalance;
 
+import com.piotrgrochowiecki.manager.domain.component.DataLoaderParametersProvider;
 import com.piotrgrochowiecki.manager.domain.component.FinancialInstrumentParametersProvider;
 import com.piotrgrochowiecki.manager.domain.model.DataLoaderModel;
 import com.piotrgrochowiecki.manager.domain.model.FinancialInstrumentModel;
 import com.piotrgrochowiecki.manager.domain.port.DataLoaderRepository;
-import com.piotrgrochowiecki.manager.domain.component.DataLoaderParametersProvider;
 import com.piotrgrochowiecki.manager.domain.port.FinancialInstrumentRepository;
 import com.piotrgrochowiecki.manager.domain.service.FinancialInstrumentService;
 import lombok.RequiredArgsConstructor;
@@ -37,9 +37,10 @@ public class AssignUnassignedFinancialInstrumentToDataLoadersUseCase {
                         FinancialInstrumentRepository.OrderBy.CREATED_ON_ASC,
                         financialInstrumentParametersProvider.getRecommendedNumberOfFinancialInstrumentsUnassignedToAnyDataLoader()));
         List<DataLoaderModel> dataLoadersReadyForAssignmentOfFinancialInstruments = new LinkedList<>(
-                dataLoaderRepository.findActiveDataLoaders(
+                dataLoaderRepository.findActiveDataLoadersWithTooLowOrNullLoadStatus(
                         DataLoaderRepository.OrderBy.LAST_CONNECTED_ON_ASC,
                         dataLoaderParametersProvider.getNumberOfDataLoadersHandledByManagerInOneCycle()));
+        log.info("List of Data Loaders ready for assignment of Financial Instruments {}", dataLoadersReadyForAssignmentOfFinancialInstruments.toString());
         assignFIsToDLs(unassignedFIs, dataLoadersReadyForAssignmentOfFinancialInstruments);
     }
 
@@ -59,4 +60,5 @@ public class AssignUnassignedFinancialInstrumentToDataLoadersUseCase {
             financialInstrumentService.update(financialInstrument);
         }
     }
+
 }

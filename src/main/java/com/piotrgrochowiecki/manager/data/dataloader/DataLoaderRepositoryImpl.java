@@ -1,5 +1,6 @@
 package com.piotrgrochowiecki.manager.data.dataloader;
 
+import com.piotrgrochowiecki.manager.domain.component.DataLoaderParametersProvider;
 import com.piotrgrochowiecki.manager.domain.exception.NotFoundException;
 import com.piotrgrochowiecki.manager.domain.model.DataLoaderModel;
 import com.piotrgrochowiecki.manager.domain.port.DataLoaderRepository;
@@ -11,7 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.*;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +24,7 @@ class DataLoaderRepositoryImpl implements DataLoaderRepository {
 
     private final DataLoaderJpaRepository jpaRepository;
     private final DataLoaderEntityMapper mapper;
+    private final DataLoaderParametersProvider parametersProvider;
 
     @Override
     @Transactional
@@ -42,10 +44,34 @@ class DataLoaderRepositoryImpl implements DataLoaderRepository {
     }
 
     @Override
+    public Collection<DataLoaderModel> findActiveDataLoadersWithTooLowOrNullLoadStatus(OrderBy orderBy, int limit) {
+        Sort sort = mapper.mapToSort(orderBy);
+        Pageable pageable = PageRequest.of(0, limit, sort);
+        List<String> allowedStatuses = List.of(
+                DataLoaderModel.Status.TOO_LOW.getDbValue()
+        );
+        return jpaRepository.findActiveDataLoadersWithAllowedStatuses(allowedStatuses, pageable)
+                .stream()
+                .map(mapper::mapToDataLoaderModel)
+                .toList();
+    }
+
+    @Override
     public List<DataLoaderModel> findActiveDataLoaders(OrderBy orderBy, int limit) {
         Sort sort = mapper.mapToSort(orderBy);
         Pageable pageable = PageRequest.of(0, limit, sort);
-        return jpaRepository.findAllActive(pageable)
+        return jpaRepository.findByActiveStatus(true, pageable)
+                .stream()
+                .map(mapper::mapToDataLoaderModel)
+                .toList();
+    }
+
+    @Override
+    public List<DataLoaderModel> findInactiveDataLoaders() {
+        Sort sort = mapper.mapToSort(DataLoaderRepository.OrderBy.LAST_LOAD_STATUS_UPDATE_ASC);
+        int limit = parametersProvider.getNumberOfDataLoadersHandledByManagerInOneCycle();
+        Pageable pageable = PageRequest.of(0, limit, sort);
+        return jpaRepository.findByActiveStatus(false, pageable)
                 .stream()
                 .map(mapper::mapToDataLoaderModel)
                 .toList();
@@ -64,22 +90,6 @@ class DataLoaderRepositoryImpl implements DataLoaderRepository {
     }
 
     @Override
-    public Collection<DataLoaderModel> findByLoadStatusAndActive(DataLoaderModel.Status loadStatus,
-                                                                 boolean active,
-                                                                 OrderBy orderBy,
-                                                                 int limit) {
-        Sort sort = mapper.mapToSort(OrderBy.LAST_INSTANT_OF_FINANCIAL_INSTRUMENTS_ASSIGNMENT_ASC);
-        Pageable pageable = PageRequest.of(0, limit, sort);
-        String loadStatusStr = loadStatus.getDbValue();
-        return jpaRepository.findByLoadStatusAndActive(loadStatusStr,
-                        active,
-                        pageable)
-                .stream()
-                .map(mapper::mapToDataLoaderModel)
-                .toList();
-    }
-
-    @Override
     public Collection<Long> findIdByLoadStatusAndActive(DataLoaderModel.Status loadStatus,
                                                         boolean active,
                                                         OrderBy orderBy,
@@ -94,9 +104,9 @@ class DataLoaderRepositoryImpl implements DataLoaderRepository {
                 .toList();
     }
 
-
     @Override
     public boolean existsByUuid(String dataLoaderUUUID) {
         return jpaRepository.existsByUuid(dataLoaderUUUID);
     }
+
 }

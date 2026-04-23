@@ -1,4 +1,4 @@
-package com.piotrgrochowiecki.manager.domain.usecase;
+package com.piotrgrochowiecki.manager.domain.usecase.loadbalance;
 
 import com.piotrgrochowiecki.manager.domain.component.DataLoaderParametersProvider;
 import com.piotrgrochowiecki.manager.domain.port.DataLoaderRepository;
