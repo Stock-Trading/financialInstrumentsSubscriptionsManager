@@ -92,13 +92,12 @@ class DataLoaderRepositoryImpl implements DataLoaderRepository {
     }
 
     @Override
-    public Collection<Long> findIdByLoadStatusAndActive(DataLoaderModel.Status loadStatus,
-                                                        boolean active,
-                                                        OrderBy orderBy,
-                                                        int limit) {
-        Sort sort = mapper.mapToSort(OrderBy.LAST_INSTANT_OF_FINANCIAL_INSTRUMENTS_ASSIGNMENT_ASC);
+    public Collection<Long> findIdOfDataLoadersWithTooHighLoadStatusAndActiveFlagSetToTrue() {
+        Sort sort = mapper.mapToSort(DataLoaderRepository.OrderBy.LAST_INSTANT_OF_FINANCIAL_INSTRUMENTS_ASSIGNMENT_ASC);
+        int limit = parametersProvider.getNumberOfDataLoadersHandledByManagerInOneCycle();
         Pageable pageable = PageRequest.of(0, limit, sort);
-        String loadStatusStr = loadStatus.getDbValue();
+        String loadStatusStr = DataLoaderModel.Status.TOO_HIGH.getDbValue();
+        boolean active = true;
         return jpaRepository.findIdByLoadStatusAndActive(loadStatusStr,
                         active,
                         pageable)

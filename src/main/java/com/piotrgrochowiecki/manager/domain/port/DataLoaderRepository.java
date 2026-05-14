@@ -30,10 +30,7 @@ public interface DataLoaderRepository {
 
     Integer setActiveToFalseAndLoadStatusToNullOfInactiveDataLoaders(Instant lastConnectedOn);
 
-    Collection<Long> findIdByLoadStatusAndActive(DataLoaderModel.Status loadStatus,
-                                                 boolean active,
-                                                 OrderBy orderBy,
-                                                 int limit);
+    Collection<Long> findIdOfDataLoadersWithTooHighLoadStatusAndActiveFlagSetToTrue();
 
     boolean existsByUuid(String dataLoaderUUID);
 }
