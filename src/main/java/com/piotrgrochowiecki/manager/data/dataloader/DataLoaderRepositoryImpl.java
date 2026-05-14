@@ -25,6 +25,7 @@ class DataLoaderRepositoryImpl implements DataLoaderRepository {
     private final DataLoaderJpaRepository jpaRepository;
     private final DataLoaderEntityMapper mapper;
     private final DataLoaderParametersProvider parametersProvider;
+    private final int limit = parametersProvider.getNumberOfDataLoadersHandledByManagerInOneCycle();
 
     @Override
     @Transactional
@@ -46,7 +47,6 @@ class DataLoaderRepositoryImpl implements DataLoaderRepository {
     @Override
     public Collection<DataLoaderModel> findActiveDataLoadersWithTooLowOrNullLoadStatus() {
         Sort sort = mapper.mapToSort(DataLoaderRepository.OrderBy.LAST_CONNECTED_ON_ASC);
-        int limit = parametersProvider.getNumberOfDataLoadersHandledByManagerInOneCycle();
         Pageable pageable = PageRequest.of(0, limit, sort);
         List<String> allowedStatuses = List.of(
                 DataLoaderModel.Status.TOO_LOW.getDbValue()
@@ -60,7 +60,6 @@ class DataLoaderRepositoryImpl implements DataLoaderRepository {
     @Override
     public List<DataLoaderModel> findActiveDataLoaders() {
         Sort sort = mapper.mapToSort(DataLoaderRepository.OrderBy.LAST_LOAD_STATUS_UPDATE_ASC);
-        int limit = parametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader();
         Pageable pageable = PageRequest.of(0, limit, sort);
         return jpaRepository.findByActiveStatus(true, pageable)
                 .stream()
@@ -71,7 +70,6 @@ class DataLoaderRepositoryImpl implements DataLoaderRepository {
     @Override
     public List<DataLoaderModel> findInactiveDataLoaders() {
         Sort sort = mapper.mapToSort(DataLoaderRepository.OrderBy.LAST_LOAD_STATUS_UPDATE_ASC);
-        int limit = parametersProvider.getNumberOfDataLoadersHandledByManagerInOneCycle();
         Pageable pageable = PageRequest.of(0, limit, sort);
         return jpaRepository.findByActiveStatus(false, pageable)
                 .stream()
@@ -94,7 +92,6 @@ class DataLoaderRepositoryImpl implements DataLoaderRepository {
     @Override
     public Collection<Long> findIdOfDataLoadersWithTooHighLoadStatusAndActiveFlagSetToTrue() {
         Sort sort = mapper.mapToSort(DataLoaderRepository.OrderBy.LAST_INSTANT_OF_FINANCIAL_INSTRUMENTS_ASSIGNMENT_ASC);
-        int limit = parametersProvider.getNumberOfDataLoadersHandledByManagerInOneCycle();
         Pageable pageable = PageRequest.of(0, limit, sort);
         String loadStatusStr = DataLoaderModel.Status.TOO_HIGH.getDbValue();
         boolean active = true;
