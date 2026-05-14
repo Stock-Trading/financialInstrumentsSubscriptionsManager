@@ -1,6 +1,5 @@
 package com.piotrgrochowiecki.manager.domain.usecase.loadbalance;
 
-import com.piotrgrochowiecki.manager.domain.component.DataLoaderParametersProvider;
 import com.piotrgrochowiecki.manager.domain.component.FinancialInstrumentParametersProvider;
 import com.piotrgrochowiecki.manager.domain.model.DataLoaderModel;
 import com.piotrgrochowiecki.manager.domain.model.FinancialInstrumentModel;
@@ -23,7 +22,6 @@ public class AssignUnassignedFinancialInstrumentToDataLoadersUseCase {
     private final FinancialInstrumentService financialInstrumentService;
     private final DataLoaderRepository dataLoaderRepository;
     private final FinancialInstrumentRepository financialInstrumentRepository;
-    private final DataLoaderParametersProvider dataLoaderParametersProvider;
     private final FinancialInstrumentParametersProvider financialInstrumentParametersProvider;
 
     /**
@@ -140,10 +138,9 @@ public class AssignUnassignedFinancialInstrumentToDataLoadersUseCase {
                         FinancialInstrumentRepository.OrderBy.CREATED_ON_ASC,
                         financialInstrumentParametersProvider.getRecommendedNumberOfFinancialInstrumentsUnassignedToAnyDataLoader()));
         List<DataLoaderModel> dataLoadersReadyForAssignmentOfFinancialInstruments = new LinkedList<>(
-                dataLoaderRepository.findActiveDataLoadersWithTooLowOrNullLoadStatus(
-                        DataLoaderRepository.OrderBy.LAST_CONNECTED_ON_ASC,
-                        dataLoaderParametersProvider.getNumberOfDataLoadersHandledByManagerInOneCycle()));
-        log.info("List of Data Loaders ready for assignment of Financial Instruments {}", dataLoadersReadyForAssignmentOfFinancialInstruments.toString());
+                dataLoaderRepository.findActiveDataLoadersWithTooLowOrNullLoadStatus());
+        log.info("List of Data Loaders ready for assignment of Financial Instruments {}",
+                dataLoadersReadyForAssignmentOfFinancialInstruments.toString());
         assignFIsToDLs(unassignedFIs, dataLoadersReadyForAssignmentOfFinancialInstruments);
     }
 

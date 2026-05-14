@@ -22,7 +22,7 @@ public interface DataLoaderRepository {
 
     DataLoaderModel findByUuid(String dataLoaderUUID);
 
-    Collection<DataLoaderModel> findActiveDataLoadersWithTooLowOrNullLoadStatus(OrderBy orderBy, int limit);
+    Collection<DataLoaderModel> findActiveDataLoadersWithTooLowOrNullLoadStatus();
 
     Collection<DataLoaderModel> findActiveDataLoaders(OrderBy orderBy, int limit);
 

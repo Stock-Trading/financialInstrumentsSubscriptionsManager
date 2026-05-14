@@ -44,8 +44,9 @@ class DataLoaderRepositoryImpl implements DataLoaderRepository {
     }
 
     @Override
-    public Collection<DataLoaderModel> findActiveDataLoadersWithTooLowOrNullLoadStatus(OrderBy orderBy, int limit) {
-        Sort sort = mapper.mapToSort(orderBy);
+    public Collection<DataLoaderModel> findActiveDataLoadersWithTooLowOrNullLoadStatus() {
+        Sort sort = mapper.mapToSort(DataLoaderRepository.OrderBy.LAST_CONNECTED_ON_ASC);
+        int limit = parametersProvider.getNumberOfDataLoadersHandledByManagerInOneCycle();
         Pageable pageable = PageRequest.of(0, limit, sort);
         List<String> allowedStatuses = List.of(
                 DataLoaderModel.Status.TOO_LOW.getDbValue()
