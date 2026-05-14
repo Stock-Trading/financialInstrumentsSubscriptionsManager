@@ -1,6 +1,5 @@
 package com.piotrgrochowiecki.manager.domain.usecase.loadbalance;
 
-import com.piotrgrochowiecki.manager.domain.component.FinancialInstrumentParametersProvider;
 import com.piotrgrochowiecki.manager.domain.model.DataLoaderModel;
 import com.piotrgrochowiecki.manager.domain.model.FinancialInstrumentModel;
 import com.piotrgrochowiecki.manager.domain.port.DataLoaderRepository;
@@ -22,7 +21,6 @@ public class AssignUnassignedFinancialInstrumentToDataLoadersUseCase {
     private final FinancialInstrumentService financialInstrumentService;
     private final DataLoaderRepository dataLoaderRepository;
     private final FinancialInstrumentRepository financialInstrumentRepository;
-    private final FinancialInstrumentParametersProvider financialInstrumentParametersProvider;
 
     /**
      * Assigns unassigned financial instruments to active data loaders with available capacity.
@@ -134,9 +132,7 @@ public class AssignUnassignedFinancialInstrumentToDataLoadersUseCase {
             return;
         }
         List<FinancialInstrumentModel> unassignedFIs = new LinkedList<>(
-                financialInstrumentRepository.findUnassignedToAnyDataLoader(
-                        FinancialInstrumentRepository.OrderBy.CREATED_ON_ASC,
-                        financialInstrumentParametersProvider.getRecommendedNumberOfFinancialInstrumentsUnassignedToAnyDataLoader()));
+                financialInstrumentRepository.findUnassignedToAnyDataLoader());
         List<DataLoaderModel> dataLoadersReadyForAssignmentOfFinancialInstruments = new LinkedList<>(
                 dataLoaderRepository.findActiveDataLoadersWithTooLowOrNullLoadStatus());
         log.info("List of Data Loaders ready for assignment of Financial Instruments {}",

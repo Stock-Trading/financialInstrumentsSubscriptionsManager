@@ -1,5 +1,6 @@
 package com.piotrgrochowiecki.manager.data.financialinstrument;
 
+import com.piotrgrochowiecki.manager.domain.component.FinancialInstrumentParametersProvider;
 import com.piotrgrochowiecki.manager.domain.model.FinancialInstrumentModel;
 import com.piotrgrochowiecki.manager.domain.port.FinancialInstrumentRepository;
 import lombok.AllArgsConstructor;
@@ -19,6 +20,7 @@ class FinancialInstrumentRepositoryImpl implements FinancialInstrumentRepository
 
     private final FinancialInstrumentJpaRepository jpaRepository;
     private final FinancialInstrumentEntityMapper mapper;
+    private final FinancialInstrumentParametersProvider parametersProvider;
 
     @Override
     public FinancialInstrumentModel save(FinancialInstrumentModel financialInstrumentModel) {
@@ -29,8 +31,9 @@ class FinancialInstrumentRepositoryImpl implements FinancialInstrumentRepository
     }
 
     @Override
-    public Collection<FinancialInstrumentModel> findUnassignedToAnyDataLoader(OrderBy orderBy, int limit) {
-        Sort sort = mapper.mapToSort(orderBy);
+    public Collection<FinancialInstrumentModel> findUnassignedToAnyDataLoader() {
+        Sort sort = mapper.mapToSort(FinancialInstrumentRepository.OrderBy.CREATED_ON_ASC);
+        int limit = parametersProvider.getRecommendedNumberOfFinancialInstrumentsUnassignedToAnyDataLoader();
         Pageable pageable = PageRequest.of(0, limit, sort);
         return jpaRepository.findByDataLoaderIdIsNull(pageable)
                 .stream()
