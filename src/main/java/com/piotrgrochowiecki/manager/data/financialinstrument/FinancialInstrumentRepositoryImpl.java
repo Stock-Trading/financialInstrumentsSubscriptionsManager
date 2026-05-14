@@ -52,14 +52,6 @@ class FinancialInstrumentRepositoryImpl implements FinancialInstrumentRepository
     }
 
     @Override
-    public FinancialInstrumentModel attachDataLoaderById(FinancialInstrumentModel financialInstrumentModel, Long dataLoaderId) {
-        financialInstrumentModel.setDataLoaderId(dataLoaderId);
-        FinancialInstrumentEntity entityToBeSaved = mapper.mapToFinancialInstrumentEntity(financialInstrumentModel);
-        FinancialInstrumentEntity savedEntity = jpaRepository.save(entityToBeSaved);
-        return mapper.mapToFinancialInstrumentModel(savedEntity);
-    }
-
-    @Override
     public List<FinancialInstrumentModel> findByDataLoaderId(Long dataLoaderId) {
         return jpaRepository.findByDataLoaderId(dataLoaderId)
                 .stream()
@@ -71,4 +63,5 @@ class FinancialInstrumentRepositoryImpl implements FinancialInstrumentRepository
     public Long findNumberOfFinancialInstrumentsAssignedToDataLoader(Long dataLoaderId) {
         return jpaRepository.countByDataLoaderId(dataLoaderId);
     }
+
 }
