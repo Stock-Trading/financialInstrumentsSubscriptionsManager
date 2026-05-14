@@ -1,7 +1,6 @@
 package com.piotrgrochowiecki.manager.domain.usecase.loadbalance;
 
 import com.piotrgrochowiecki.manager.domain.component.DataLoaderParametersProvider;
-import com.piotrgrochowiecki.manager.domain.model.DataLoaderModel;
 import com.piotrgrochowiecki.manager.domain.model.FinancialInstrumentModel;
 import com.piotrgrochowiecki.manager.domain.port.DataLoaderRepository;
 import com.piotrgrochowiecki.manager.domain.port.FinancialInstrumentRepository;
@@ -204,13 +203,10 @@ public class UnassignFinancialInstrumentFromDataLoaderWithTooHighLoadStatusUseCa
     @Transactional
     public void unassignFinancialInstrumentsFromDataLoaderWithTooHighLoadStatus() {
         log.info("Retrieving IDs of Data Loaders with Too High status and Active flag set to true");
-        List<Long> idsOfDataLoadersWithTooHighBalance = dataLoaderRepository.findIdByLoadStatusAndActive(
-                        DataLoaderModel.Status.TOO_HIGH,
-                        true,
-                        DataLoaderRepository.OrderBy.LAST_INSTANT_OF_FINANCIAL_INSTRUMENTS_ASSIGNMENT_ASC,
-                        dataLoaderParametersProvider.getNumberOfDataLoadersHandledByManagerInOneCycle())
-                .stream()
-                .toList();
+        List<Long> idsOfDataLoadersWithTooHighBalance =
+                dataLoaderRepository.findIdOfDataLoadersWithTooHighLoadStatusAndActiveFlagSetToTrue()
+                        .stream()
+                        .toList();
         log.debug("Ids of Data Loaders with load status Too High and Active flag set to true: {}",
                 Arrays.toString(idsOfDataLoadersWithTooHighBalance.toArray()));
         for (Long id : idsOfDataLoadersWithTooHighBalance) {

@@ -1,7 +1,5 @@
 package com.piotrgrochowiecki.manager.domain.usecase.loadbalance;
 
-import com.piotrgrochowiecki.manager.domain.component.DataLoaderParametersProvider;
-import com.piotrgrochowiecki.manager.domain.component.FinancialInstrumentParametersProvider;
 import com.piotrgrochowiecki.manager.domain.model.DataLoaderModel;
 import com.piotrgrochowiecki.manager.domain.model.FinancialInstrumentModel;
 import com.piotrgrochowiecki.manager.domain.port.DataLoaderRepository;
@@ -23,8 +21,6 @@ public class AssignUnassignedFinancialInstrumentToDataLoadersUseCase {
     private final FinancialInstrumentService financialInstrumentService;
     private final DataLoaderRepository dataLoaderRepository;
     private final FinancialInstrumentRepository financialInstrumentRepository;
-    private final DataLoaderParametersProvider dataLoaderParametersProvider;
-    private final FinancialInstrumentParametersProvider financialInstrumentParametersProvider;
 
     /**
      * Assigns unassigned financial instruments to active data loaders with available capacity.
@@ -136,14 +132,11 @@ public class AssignUnassignedFinancialInstrumentToDataLoadersUseCase {
             return;
         }
         List<FinancialInstrumentModel> unassignedFIs = new LinkedList<>(
-                financialInstrumentRepository.findUnassignedToAnyDataLoader(
-                        FinancialInstrumentRepository.OrderBy.CREATED_ON_ASC,
-                        financialInstrumentParametersProvider.getRecommendedNumberOfFinancialInstrumentsUnassignedToAnyDataLoader()));
+                financialInstrumentRepository.findUnassignedToAnyDataLoader());
         List<DataLoaderModel> dataLoadersReadyForAssignmentOfFinancialInstruments = new LinkedList<>(
-                dataLoaderRepository.findActiveDataLoadersWithTooLowOrNullLoadStatus(
-                        DataLoaderRepository.OrderBy.LAST_CONNECTED_ON_ASC,
-                        dataLoaderParametersProvider.getNumberOfDataLoadersHandledByManagerInOneCycle()));
-        log.info("List of Data Loaders ready for assignment of Financial Instruments {}", dataLoadersReadyForAssignmentOfFinancialInstruments.toString());
+                dataLoaderRepository.findActiveDataLoadersWithTooLowOrNullLoadStatus());
+        log.info("List of Data Loaders ready for assignment of Financial Instruments {}",
+                dataLoadersReadyForAssignmentOfFinancialInstruments.toString());
         assignFIsToDLs(unassignedFIs, dataLoadersReadyForAssignmentOfFinancialInstruments);
     }
 

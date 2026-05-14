@@ -16,13 +16,11 @@ public interface FinancialInstrumentRepository {
 
     FinancialInstrumentModel save(FinancialInstrumentModel financialInstrumentModel);
 
-    Collection<FinancialInstrumentModel> findUnassignedToAnyDataLoader(OrderBy orderBy, int limit);
+    Collection<FinancialInstrumentModel> findUnassignedToAnyDataLoader();
 
     boolean existsWithNoDataLoaderAssigned();
 
     int detachDataLoaderBasedOnIds(List<Long> listOfFinancialInstrumentModelIds);
-
-    FinancialInstrumentModel attachDataLoaderById(FinancialInstrumentModel financialInstrumentModel, Long dataLoaderId);
 
     List<FinancialInstrumentModel> findByDataLoaderId(Long dataLoaderId);
 

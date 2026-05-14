@@ -22,18 +22,15 @@ public interface DataLoaderRepository {
 
     DataLoaderModel findByUuid(String dataLoaderUUID);
 
-    Collection<DataLoaderModel> findActiveDataLoadersWithTooLowOrNullLoadStatus(OrderBy orderBy, int limit);
+    Collection<DataLoaderModel> findActiveDataLoadersWithTooLowOrNullLoadStatus();
 
-    Collection<DataLoaderModel> findActiveDataLoaders(OrderBy orderBy, int limit);
+    Collection<DataLoaderModel> findActiveDataLoaders();
 
     Collection<DataLoaderModel> findInactiveDataLoaders();
 
     Integer setActiveToFalseAndLoadStatusToNullOfInactiveDataLoaders(Instant lastConnectedOn);
 
-    Collection<Long> findIdByLoadStatusAndActive(DataLoaderModel.Status loadStatus,
-                                                 boolean active,
-                                                 OrderBy orderBy,
-                                                 int limit);
+    Collection<Long> findIdOfDataLoadersWithTooHighLoadStatusAndActiveFlagSetToTrue();
 
     boolean existsByUuid(String dataLoaderUUID);
 }
