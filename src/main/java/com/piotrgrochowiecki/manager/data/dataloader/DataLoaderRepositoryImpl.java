@@ -12,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.annotation.PostConstruct;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
@@ -25,7 +26,12 @@ class DataLoaderRepositoryImpl implements DataLoaderRepository {
     private final DataLoaderJpaRepository jpaRepository;
     private final DataLoaderEntityMapper mapper;
     private final DataLoaderParametersProvider parametersProvider;
-    private final int limit = parametersProvider.getNumberOfDataLoadersHandledByManagerInOneCycle();
+    private int limit;
+
+    @PostConstruct
+    void initialize() {
+        limit = parametersProvider.getNumberOfDataLoadersHandledByManagerInOneCycle();
+    }
 
     @Override
     @Transactional

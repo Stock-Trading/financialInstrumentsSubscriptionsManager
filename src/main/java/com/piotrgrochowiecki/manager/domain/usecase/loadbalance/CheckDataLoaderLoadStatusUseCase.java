@@ -11,6 +11,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.annotation.PostConstruct;
 import java.util.List;
 
 @Log4j2
@@ -24,8 +25,13 @@ public class CheckDataLoaderLoadStatusUseCase {
     private final DataLoaderService dataLoaderService;
     private final TimeService timeService;
 
-    private final int recommendedNumberOfFinancialInstrumentsPerDataLoader =
-            dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader();
+    private int recommendedNumberOfFinancialInstrumentsPerDataLoader;
+
+    @PostConstruct
+    void initialize() {
+        recommendedNumberOfFinancialInstrumentsPerDataLoader =
+                dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader();
+    }
 
     /**
      * Checks and updates the load status of active data loaders.
