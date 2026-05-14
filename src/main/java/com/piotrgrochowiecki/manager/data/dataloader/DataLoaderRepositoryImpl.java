@@ -58,8 +58,9 @@ class DataLoaderRepositoryImpl implements DataLoaderRepository {
     }
 
     @Override
-    public List<DataLoaderModel> findActiveDataLoaders(OrderBy orderBy, int limit) {
-        Sort sort = mapper.mapToSort(orderBy);
+    public List<DataLoaderModel> findActiveDataLoaders() {
+        Sort sort = mapper.mapToSort(DataLoaderRepository.OrderBy.LAST_LOAD_STATUS_UPDATE_ASC);
+        int limit = parametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader();
         Pageable pageable = PageRequest.of(0, limit, sort);
         return jpaRepository.findByActiveStatus(true, pageable)
                 .stream()

@@ -24,7 +24,7 @@ public interface DataLoaderRepository {
 
     Collection<DataLoaderModel> findActiveDataLoadersWithTooLowOrNullLoadStatus();
 
-    Collection<DataLoaderModel> findActiveDataLoaders(OrderBy orderBy, int limit);
+    Collection<DataLoaderModel> findActiveDataLoaders();
 
     Collection<DataLoaderModel> findInactiveDataLoaders();
 

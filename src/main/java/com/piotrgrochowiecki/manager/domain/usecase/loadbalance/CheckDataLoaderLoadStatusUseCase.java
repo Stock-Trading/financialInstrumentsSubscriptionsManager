@@ -24,6 +24,9 @@ public class CheckDataLoaderLoadStatusUseCase {
     private final DataLoaderService dataLoaderService;
     private final TimeService timeService;
 
+    private final int recommendedNumberOfFinancialInstrumentsPerDataLoader =
+            dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader();
+
     /**
      * Checks and updates the load status of active data loaders.
      *
@@ -157,9 +160,7 @@ public class CheckDataLoaderLoadStatusUseCase {
     @Transactional
     public void checkLoadStatus() {
         log.info("Retrieving Data Loaders to check their load status");
-        List<DataLoaderModel> dataLoaderModelList = dataLoaderRepository.findActiveDataLoaders(
-                        DataLoaderRepository.OrderBy.LAST_LOAD_STATUS_UPDATE_ASC,
-                        dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader())
+        List<DataLoaderModel> dataLoaderModelList = dataLoaderRepository.findActiveDataLoaders()
                 .stream()
                 .toList();
         log.info("List of Data Loaders contains {} objects", dataLoaderModelList.size());
@@ -184,15 +185,15 @@ public class CheckDataLoaderLoadStatusUseCase {
                 dataLoader.getUuid(),
                 numberOfAssignedFinancialInstruments,
                 loadStatus,
-                dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader());
+                recommendedNumberOfFinancialInstrumentsPerDataLoader);
         dataLoaderService.update(dataLoader);
     }
 
     private DataLoaderModel.Status getStatus(long numberOfAssignedFinancialInstruments) {
         DataLoaderModel.Status loadStatus;
-        if (numberOfAssignedFinancialInstruments == dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader()) {
+        if (numberOfAssignedFinancialInstruments == recommendedNumberOfFinancialInstrumentsPerDataLoader) {
             loadStatus = DataLoaderModel.Status.BALANCED;
-        } else if (numberOfAssignedFinancialInstruments < dataLoaderParametersProvider.getRecommendedNumberOfFinancialInstrumentsPerDataLoader()) {
+        } else if (numberOfAssignedFinancialInstruments < recommendedNumberOfFinancialInstrumentsPerDataLoader) {
             loadStatus = DataLoaderModel.Status.TOO_LOW;
         } else {
             loadStatus = DataLoaderModel.Status.TOO_HIGH;
