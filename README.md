@@ -16,7 +16,7 @@
 
 ## About
 
-This microservice is responsible for the real-time management of Financial Instruments (FIs) assigned to Data Loaders (DLs). Data Loaders register with the service and perform periodic health checks. Financial Instruments are pre-loaded into the database, and the service manages subscriptions—determining which FIs each Data Loader should handle. The service distributes the workload efficiently across all active Data Loaders using an intelligent round-robin algorithm with automatic rebalancing.
+This microservice is responsible for the real-time management of Financial Instruments (FIs) assigned to Data Loaders (DLs). Data Loaders register with the service and perform periodic health checks. Financial Instruments are preloaded into the database, and the service manages subscriptions—determining which FIs each Data Loader should handle. The service distributes the workload efficiently across all active Data Loaders using an intelligent round-robin algorithm with automatic rebalancing.
 
 ### Key Responsibilities
 
@@ -39,12 +39,12 @@ This microservice is responsible for the real-time management of Financial Instr
 
 ## Technology Stack
 
-| Component | Version |
-|-----------|---------|
-| Java | 25 |
-| Spring Boot | 4.x |
-| PostgreSQL | Alpine 3.18 |
-| Docker | Latest |
+| Component   | Version     |
+|-------------|-------------|
+| Java        | 25          |
+| Spring Boot | 4.x         |
+| PostgreSQL  | Alpine 3.18 |
+| Docker      | Latest      |
 
 ## Architecture
 
