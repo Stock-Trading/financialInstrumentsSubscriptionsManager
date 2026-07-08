@@ -12,7 +12,7 @@ For unit testing purposes:
 - for instances of Data Loaders and Financial Instruments use example business values:
 Data Loader example: 
 id = 3 (or other random long)
-uuid = use UUID.random()
+uuid = use UUID.randomUUID().toString()
 lastConnectedOn, lastInstantOfFinancialInstrumentsAssignment, lastLoadStatusUpdate= some mocked Instant
 active = true / false
 status = TOO_HIGH, TOO_LOW or BALANCED
