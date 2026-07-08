@@ -1,5 +1,5 @@
 ---
-applyTo: "scr/test/**/*"
+applyTo: "src/test/**/*"
 ---
 
 For unit testing purposes:
