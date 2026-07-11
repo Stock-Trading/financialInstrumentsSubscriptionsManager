@@ -4,7 +4,8 @@ import com.piotrgrochowiecki.manager.domain.component.DataLoaderParametersProvid
 import com.piotrgrochowiecki.manager.domain.exception.NotFoundException;
 import com.piotrgrochowiecki.manager.domain.model.DataLoaderModel;
 import com.piotrgrochowiecki.manager.domain.port.DataLoaderRepository;
-import lombok.AllArgsConstructor;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -12,14 +13,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.annotation.PostConstruct;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Log4j2
 class DataLoaderRepositoryImpl implements DataLoaderRepository {
 
