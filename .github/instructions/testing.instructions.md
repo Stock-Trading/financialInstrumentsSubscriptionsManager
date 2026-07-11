@@ -2,8 +2,8 @@
 applyTo: "src/test/**/*"
 ---
 
-For unit testing purposes:
-- use Behaviour-Driven Development
+## Unit tests requirements
+- use Behavior-Driven Development
 - use JUnit 5 (Jupiter)
 - use given, when, then convention with one line of space between each section; within the section do not use empty lines if not needed for clarity
 - use @DisplayName annotation with given, when and then sections. Each section should start at new line and end with comma, use java text blocks for strings
@@ -26,3 +26,6 @@ dataLoaderId = some id of mocked Data Loader or null
 Basically, these fields and their types are available in classes of com.piotrgrochowiecki.manager.domain.model package
 
 In case of doubts, ask before proceeding
+
+## Build and Test Tools
+- Use Maven Wrapper (`mvnw`) instead of `mvn` for running tests
