@@ -42,7 +42,7 @@ class AssignUnassignedFinancialInstrumentToDataLoadersUseCaseTest {
             Given all financial instruments are assigned,
             when assignUnassignedInstrumentsToActiveDataLoaders is called,
             then should return early without performing any assignments,""")
-    void should() {
+    void should_returnEarly() {
         // Given
         when(financialInstrumentRepository.existsWithNoDataLoaderAssigned()).thenReturn(false);
 

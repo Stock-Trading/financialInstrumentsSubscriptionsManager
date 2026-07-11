@@ -47,6 +47,7 @@ public class CheckDataLoaderLoadStatusUseCase {
      *     │   - Query all DLs with active=true                      │
      *     │   - Order by: LAST_LOAD_STATUS_UPDATE_ASC               │
      *     │     (oldest update first - ensures fairness)            │
+     *     │     (above is ensured by repository methods)            │
      *     │   - Limit: Configurable batch size                      │
      *     │   - Result: List of active Data Loaders                 │
      *     └──────────────────┬──────────────────────────────────────┘
