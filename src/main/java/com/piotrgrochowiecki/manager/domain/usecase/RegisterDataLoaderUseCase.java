@@ -32,4 +32,5 @@ public class RegisterDataLoaderUseCase {
                 .build();
         return dataLoaderRepository.save(dataLoaderModel);
     }
+
 }
