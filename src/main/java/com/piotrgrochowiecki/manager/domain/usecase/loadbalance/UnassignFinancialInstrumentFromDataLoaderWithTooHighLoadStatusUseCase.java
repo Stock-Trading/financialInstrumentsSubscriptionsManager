@@ -33,10 +33,7 @@ public class UnassignFinancialInstrumentFromDataLoaderWithTooHighLoadStatusUseCa
      *     ┌─────────────────────────────────────────────────────────┐
      *     │ STEP 1: Find Overloaded Data Loaders                    │
      *     │   - Query: Find DLs with loadStatus=TOO_HIGH            │
-     *     │   - Filter: AND active=true (only active ones)          │
-     *     │   - Order by: LAST_INSTANT_OF_FINANCIAL_INSTRUMENTS     │
-     *     │     ASSIGNMENT_ASC (oldest first - fairness)            │
-     *     │   - Limit: Configurable batch size                      │
+     *     │   -        AND active=true (only active ones)           │
      *     │   - Result: List of IDs for overloaded DLs              │
      *     └──────────────────┬──────────────────────────────────────┘
      *                        │
@@ -182,7 +179,6 @@ public class UnassignFinancialInstrumentFromDataLoaderWithTooHighLoadStatusUseCa
      * </p>
      * <ul>
      *   <li>Find all active data loaders with TOO_HIGH load status</li>
-     *   <li>Order them by oldest assignment time to ensure fairness</li>
      *   <li>For each loader, calculate how many FIs exceed recommended capacity</li>
      *   <li>Keep only the recommended number of oldest FIs</li>
      *   <li>Unassign all excess financial instruments</li>
