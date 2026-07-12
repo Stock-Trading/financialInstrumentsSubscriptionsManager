@@ -28,4 +28,4 @@ Basically, these fields and their types are available in classes of com.piotrgro
 In case of doubts, ask before proceeding
 
 ## Build and Test Tools
-- Use Maven Wrapper (`mvnw`) instead of `mvn` for running tests
+- Use Maven for running tests
