@@ -50,15 +50,6 @@ interface DataLoaderJpaRepository extends JpaRepository<DataLoaderEntity, Long> 
             @Param("allowedStatuses") java.util.List<String> allowedStatuses,
             Pageable pageable);
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @QueryHints(value = {
-            @QueryHint(name = "jakarta.persistence.lock.timeout",
-                    value = "-2")
-    })
-    List<DataLoaderEntity> findByActiveAndLastConnectedOnLessThan(Boolean activeStatus,
-                                                                  Instant lastConnectedOn,
-                                                                  Pageable pageable);
-
     /**
      * Sets <i>Active</i> flag to <b>false</b> and <i>LoadStatus</i> to <b>null</b> of DataLoaders that are active (=true),
      * but they have not connected to the service in specified threshold.
@@ -81,18 +72,6 @@ interface DataLoaderJpaRepository extends JpaRepository<DataLoaderEntity, Long> 
     Integer setActiveToFalseAndLoadStatusToNullOfInactiveDataLoaders(
             @Param("lastConnectedOn") Instant lastConnectedOn);
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @QueryHints(value = {
-            @QueryHint(name = "jakarta.persistence.lock.timeout", value = "-2")
-    })
-    List<DataLoaderEntity> findByLastConnectedOnGreaterThanAndLastInstantOfFinancialInstrumentsAssignmentLessThanEqual(Instant lastConnectedOn,
-                                                                                                                       Instant firstHandledOn,
-                                                                                                                       Pageable pageable);
-
-    List<DataLoaderEntity> findByLoadStatusAndActive(String status,
-                                                     Boolean active,
-                                                     Pageable pageable);
-
     @Query(value = """
             SELECT
                 dl.id
@@ -106,4 +85,5 @@ interface DataLoaderJpaRepository extends JpaRepository<DataLoaderEntity, Long> 
     List<Long> findIdByLoadStatusAndActive(@Param("status") String status,
                                            @Param("active") Boolean active,
                                            Pageable pageable);
+
 }
