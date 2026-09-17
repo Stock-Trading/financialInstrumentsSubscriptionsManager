@@ -60,7 +60,7 @@ Timeline (seconds):
 
 | Priority | Task                         | Interval   | Purpose                                          | Dependencies               |
 |----------|------------------------------|------------|--------------------------------------------------|----------------------------|
-| 1 (High) | Unassign from Inactive DLs   | 1 second   | **CRÍTICO**: Clean up failed loaders immediately | None                       |
+| 1 (High) | Unassign from Inactive DLs   | 1 second   | **CRITCAL**: Clean up failed loaders immediately | None                       |
 | 2        | Check Active State           | 3 seconds  | Update active status of all DLs                  | None                       |
 | 3        | Check Load Status            | 5 seconds  | Calculate current load of each DL                | Active state               |
 | 4        | Assign Unassigned FIs        | 10 seconds | Distribute free FIs to available capacity        | Active state + Load status |
@@ -103,20 +103,20 @@ Timeline (seconds):
 │  (Orchestrates all scheduled tasks)                         │
 ├┬────────────────────────────────────────────────────────────┤
 ││  Scheduled Tasks (run continuously & independently)        │
-│├─────────────────────────────────────────────────────────────┤
+│├────────────────────────────────────────────────────────────┤
 ││ ┌──────────────────────────────────────────────────────┐   │
 ││ │ 1. UnassignFinancialInstrumentFromAllInactive        │   │
-││ │    DataLoaderUseCase (every 1s)                     │   │
+││ │    DataLoaderUseCase (every 1s)                      │   │
 ││ ├──────────────────────────────────────────────────────┤   │
-││ │ 2. CheckActiveStateOfDataLoaderUseCase (every 3s)   │   │
+││ │ 2. CheckActiveStateOfDataLoaderUseCase (every 3s)    │   │
 ││ ├──────────────────────────────────────────────────────┤   │
-││ │ 3. CheckDataLoaderLoadStatusUseCase (every 5s)      │   │
+││ │ 3. CheckDataLoaderLoadStatusUseCase (every 5s)       │   │
 ││ ├──────────────────────────────────────────────────────┤   │
-││ │ 4. AssignUnassignedFinancialInstrumentToDataLoaders │   │
-││ │    UseCase (every 10s)                              │   │
+││ │ 4. AssignUnassignedFinancialInstrumentToDataLoaders  │   │
+││ │    UseCase (every 10s)                               │   │
 ││ ├──────────────────────────────────────────────────────┤   │
-││ │ 5. UnassignFinancialInstrumentFromDataLoaderWith    │   │
-││ │    TooHighLoadStatusUseCase (every 12s)             │   │
+││ │ 5. UnassignFinancialInstrumentFromDataLoaderWith     │   │
+││ │    TooHighLoadStatusUseCase (every 12s)              │   │
 ││ └──────────────────────────────────────────────────────┘   │
 │└────────────────────────────────────────────────────────────┤
 ├─────────────────────────────────────────────────────────────┤
@@ -127,13 +127,13 @@ Timeline (seconds):
 │  └─ TimeService                                             │
 ├─────────────────────────────────────────────────────────────┤
 │  Data Access Layer (JPA)                                    │
-│  ├─ DataLoaderEntity / DataLoaderJpaRepository             │
+│  ├─ DataLoaderEntity / DataLoaderJpaRepository              │
 │  └─ FinancialInstrumentEntity / FinancialInstrumentJpa      │
-│     Repository                                             │
+│     Repository                                              │
 ├─────────────────────────────────────────────────────────────┤
 │  Database                                                   │
-│  ├─ data_loaders (id, uuid, active, load_status, ...)      │
-│  └─ financial_instruments (id, name, data_loader_id, ...)  │
+│  ├─ data_loaders (id, uuid, active, load_status, ...)       │
+│  └─ financial_instruments (id, name, data_loader_id, ...)   │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -141,7 +141,7 @@ Timeline (seconds):
 
 ```
 ┌─────────────┐                    ┌────────────────┐
-│  DataLoader │ 1──────────────────N │FinancialInst. │
+│  DataLoader │ 1─────────────────N│FinancialInst.  │
 ├─────────────┤                    ├────────────────┤
 │ id (PK)     │                    │ id (PK)        │
 │ uuid        │                    │ name           │
@@ -166,9 +166,9 @@ Timeline (seconds):
               │ (first check-in)
               ▼
      ┌─────────────────┐
-     │  ACTIVE         │◄──────────────────┐
-     │ (active=true)   │    (check-in ok)  │
-     │ loadStatus varied│                  │
+     │  ACTIVE         │◄─────────────────┐
+     │ (active=true)   │    (check-in ok) │
+     │loadStatus varied│                  │
      └────────┬────────┘                  │
               │                           │
               │ (no check-in > threshold) │
@@ -194,16 +194,16 @@ Timeline (seconds):
 
 ```
 ┌─────────────┐
-│ UNASSIGNED  │◄──────────────────────────┐
+│ UNASSIGNED  │◄────────────────────────── ┐
 │ dataLoaderId│ (1. Unassign from inactive)│
-│  = null     │ (5. Unassign if overloaded)
-└──────┬──────┘                          │
-       │                                 │
-       │ (4. Assign to available)        │
-       ▼                                 │
-┌─────────────┐────────────────────────┐
-│ ASSIGNED    │ (2. Move to different DL)│
-│ dataLoaderId│◄───────────────────────┘
+│  = null     │ (5. Unassign if overloaded)│
+└──────┬──────┘                            │
+       │                                   │
+       │ (4. Assign to available)          │
+       ▼                                   │
+┌─────────────┐────────────────────────────┐
+│ ASSIGNED    │ (2. Move to different DL)  │
+│ dataLoaderId│◄───────────────────────────┘
 │  = DL_ID    │
 └─────────────┘
 ```
