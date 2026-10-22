@@ -12,7 +12,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @Log4j2
 public class FinancialInstrumentsSubscriptionsManagerApplication {
 
-	public static void main(String[] args) {
+	static void main(String[] args) {
 		SpringApplication.run(FinancialInstrumentsSubscriptionsManagerApplication.class, args);
 	}
 
